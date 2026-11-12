@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoFast | Meu extrato</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="cidadao.html"><i class="fas fa-leaf"></i> EcoFast</a>
+    <nav>
+      <a href="cidadao.html" class="ativo">Meu extrato</a>
+      <span class="usuario-topo"><i class="fas fa-user"></i> <span id="nome-usuario"></span></span>
+      <button class="btn-sair" id="btn-sair"><i class="fas fa-right-from-bracket"></i> Sair</button>
+    </nav>
+  </header>
+
+  <main class="pagina">
+    <section class="saldo-hero">
+      <div>
+        <span>Seu saldo</span>
+        <strong><i class="fas fa-coins"></i> <span id="saldo">--</span></strong>
+        <span>EcoCoins</span>
+      </div>
+      <div class="cadeado">
+        <i class="fas fa-lock"></i> Seu saldo é protegido: ele só aumenta quando um funcionário do ecoponto confirma o peso da sua entrega na balança.
+      </div>
+    </section>
+
+    <div class="grid-kpi">
+      <div class="kpi"><span><i class="fas fa-weight-hanging"></i>Material reciclado</span><strong id="total-kg">--</strong></div>
+      <div class="kpi"><span><i class="fas fa-box-open"></i>Entregas</span><strong id="entregas">--</strong></div>
+      <div class="kpi"><span><i class="fas fa-cloud"></i>Lixo fora do aterro</span><strong id="aterro">--</strong></div>
+    </div>
+
+    <div class="grid-2">
+      <section class="card">
+        <h2><i class="fas fa-receipt"></i> Extrato de descartes</h2>
+        <div class="tabela-wrap">
+          <table>
+            <thead><tr><th>Data</th><th>Material</th><th class="num">Peso</th><th class="num">EcoCoins</th></tr></thead>
+            <tbody id="extrato"><tr><td colspan="4" class="vazio">Carregando...</td></tr></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2><i class="fas fa-gift"></i> Use suas EcoCoins</h2>
+        <div class="beneficio">
+          <i class="fas fa-house-chimney"></i>
+          <div>
+            <strong>Desconto no IPTU</strong>
+            <p class="dica">A cada 1.000 EcoCoins, a prefeitura concede R$ 50,00 de desconto no IPTU do ano seguinte.</p>
+            <div class="barra"><div id="barra-iptu" style="width: 0%"></div></div>
+            <p class="dica" id="texto-iptu"></p>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="js/api.js"></script>
+  <script src="js/cidadao.js"></script>
+</body>
+</html>

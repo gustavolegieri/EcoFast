@@ -1,0 +1,63 @@
+==============================================
+  ECOFAST - COMO RODAR O SISTEMA (PASSO A PASSO)
+==============================================
+
+O QUE PRECISA TER INSTALADO
+---------------------------
+Só o Java 17 ou mais novo. (O Maven NÃO precisa instalar, o projeto baixa sozinho.)
+
+  Para ver se já tem: abra o Prompt de Comando (cmd) e digite:
+      java -version
+  Se aparecer "version 17" ou maior (17, 21, 25...), está ok.
+  Se não aparecer, baixe e instale o Java em: https://adoptium.net
+  (na instalação, marque a opção "Set JAVA_HOME" / "Add to PATH").
+
+
+JEITO FÁCIL (WINDOWS)
+---------------------
+1. Extraia o arquivo EcoFast-Web.zip (botão direito > "Extrair tudo").
+2. Entre na pasta EcoFast-Web.
+3. Dê dois cliques em RODAR.bat
+4. Espere aparecer "Started EcoFastApplication" na janela preta.
+   (Na primeira vez demora alguns minutos, porque baixa as dependências. Precisa de internet.)
+5. O navegador abre sozinho. Se não abrir, acesse:  http://localhost:8080
+6. Para desligar, feche a janela preta.
+
+
+JEITO MANUAL (WINDOWS, MAC OU LINUX)
+------------------------------------
+1. Extraia o zip.
+2. Abra o terminal / Prompt de Comando dentro da pasta EcoFast-Web\backend
+3. Rode:
+      Windows:      mvnw.cmd spring-boot:run
+      Mac/Linux:    ./mvnw spring-boot:run
+4. Abra no navegador:  http://localhost:8080
+
+
+COMO ENTRAR NO SISTEMA (senha de todos: 123456)
+-----------------------------------------------
+  Cidadão ........... maria@email.com
+  Funcionário ....... funcionario@ecofast.com
+  Administrador ..... admin@ecofast.com
+
+  Dica: na tela de login, clique nos links "Cidadã / Funcionário / Administrador"
+  que ele preenche e-mail e senha sozinho.
+
+  Para testar um registro (logado como Funcionário), use o CPF 111.111.111-11,
+  escolha o material, digite o peso e clique em "Salvar descarte".
+
+  Os dados são de exemplo e voltam ao normal toda vez que o sistema é reiniciado.
+
+
+APRESENTAÇÃO (PITCH)
+--------------------
+  Abra o arquivo  EcoFast-Web\apresentacao\index.html  no navegador
+  (não precisa do sistema rodando). É uma página única: é só rolar.
+
+
+PROBLEMAS COMUNS
+----------------
+* "java não é reconhecido"  -> o Java não está instalado (veja o início).
+* "Port 8080 was already in use" -> o sistema já está aberto em outra janela;
+  feche-a ou reinicie o PC.
+* Página não abre -> espere aparecer "Started EcoFastApplication" e atualize (F5).

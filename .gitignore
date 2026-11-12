@@ -1,0 +1,24 @@
+﻿# build e dependencias
+target/
+*.class
+*.jar
+dist/
+out/
+node_modules/
+
+# logs e temporarios
+*.log
+*.tmp
+
+# IDE e ferramentas
+.idea/
+.vscode/
+.claude/
+*.iml
+
+# Windows
+Thumbs.db
+desktop.ini
+
+# configuracao local com senha de banco
+config.properties

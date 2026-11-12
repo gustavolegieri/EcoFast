@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoFast | Painel do administrador</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <header class="topo">
+    <a class="marca" href="admin.html"><i class="fas fa-leaf"></i> EcoFast</a>
+    <nav>
+      <a href="admin.html" class="ativo">Relatórios</a>
+      <a href="funcionario.html">Registrar descarte</a>
+      <span class="usuario-topo"><i class="fas fa-user-shield"></i> <span id="nome-usuario"></span></span>
+      <button class="btn-sair" id="btn-sair"><i class="fas fa-right-from-bracket"></i> Sair</button>
+    </nav>
+  </header>
+
+  <main class="pagina">
+    <div class="titulo-pagina">
+      <h1>Painel do ecoponto</h1>
+      <p>Volume arrecadado nos últimos <span id="dias">30</span> dias.</p>
+    </div>
+
+    <div class="grid-kpi">
+      <div class="kpi"><span><i class="fas fa-weight-hanging"></i>Total arrecadado</span><strong id="kpi-kg">--</strong></div>
+      <div class="kpi"><span><i class="fas fa-box-open"></i>Entregas</span><strong id="kpi-entregas">--</strong></div>
+      <div class="kpi"><span><i class="fas fa-users"></i>Cidadãos atendidos</span><strong id="kpi-cidadaos">--</strong></div>
+      <div class="kpi"><span><i class="fas fa-coins"></i>EcoCoins emitidas</span><strong id="kpi-pontos">--</strong></div>
+    </div>
+
+    <div class="grid-2">
+      <section class="card">
+        <h2><i class="fas fa-chart-column"></i> Kg arrecadados por dia</h2>
+        <div class="grafico"><canvas id="grafico-dia" aria-label="Quilos arrecadados por dia"></canvas></div>
+      </section>
+      <section class="card">
+        <h2><i class="fas fa-chart-pie"></i> Kg por tipo de material</h2>
+        <div class="grafico"><canvas id="grafico-material" aria-label="Quilos por material"></canvas></div>
+      </section>
+    </div>
+
+    <section class="card" style="margin-top: 1.5rem">
+      <h2><i class="fas fa-trophy"></i> Cidadãos que mais reciclaram</h2>
+      <div class="tabela-wrap">
+        <table>
+          <thead><tr><th>#</th><th>Cidadão</th><th class="num">Kg entregues</th><th class="num">EcoCoins</th></tr></thead>
+          <tbody id="ranking"></tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/admin.js"></script>
+</body>
+</html>

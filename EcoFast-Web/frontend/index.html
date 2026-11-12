@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EcoFast | Entrar</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="login-pagina">
+    <section class="login-lado">
+      <div class="marca"><i class="fas fa-leaf"></i> EcoFast</div>
+      <h1>Recicle no ecoponto.<br>Ganhe EcoCoins.</h1>
+      <p>A plataforma que digitaliza a gestão dos ecopontos da cidade e recompensa quem descarta certo.</p>
+      <ul>
+        <li><i class="fas fa-scale-balanced"></i> O funcionário pesa e registra a entrega</li>
+        <li><i class="fas fa-coins"></i> O sistema calcula e credita seus pontos</li>
+        <li><i class="fas fa-house-chimney"></i> Troque por descontos no IPTU</li>
+      </ul>
+    </section>
+
+    <section class="login-form">
+      <div class="card">
+        <h2><i class="fas fa-right-to-bracket"></i> Entrar na plataforma</h2>
+        <div id="mensagem" class="alerta erro oculto" role="alert"></div>
+        <form id="form-login">
+          <div class="campo">
+            <label for="email">E-mail</label>
+            <input type="email" id="email" required autocomplete="username" placeholder="voce@email.com">
+          </div>
+          <div class="campo">
+            <label for="senha">Senha</label>
+            <input type="password" id="senha" required autocomplete="current-password">
+          </div>
+          <button class="btn largo" type="submit" id="btn-entrar"><i class="fas fa-arrow-right"></i> Entrar</button>
+        </form>
+        <div class="contas-demo">
+          <strong>Contas de demonstração</strong> (senha <code>123456</code>):<br>
+          <button type="button" data-email="maria@email.com">Cidadã</button> ·
+          <button type="button" data-email="funcionario@ecofast.com">Funcionário</button> ·
+          <button type="button" data-email="admin@ecofast.com">Administrador</button>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="js/api.js"></script>
+  <script src="js/login.js"></script>
+</body>
+</html>
