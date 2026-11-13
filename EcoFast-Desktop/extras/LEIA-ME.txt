@@ -1,0 +1,48 @@
+==============================================
+  ECOFAST (APLICATIVO PARA WINDOWS)
+==============================================
+
+COMO ABRIR
+----------
+1. Extraia este zip (botao direito > "Extrair tudo") em uma pasta sua, por exemplo em Documentos.
+2. Abra a pasta EcoFast e de dois cliques em  EcoFast.exe
+   (ou de dois cliques em "Criar atalho na area de trabalho.bat" para ter um atalho).
+
+Nao precisa instalar o Java: ele ja vai dentro da pasta.
+
+O Windows pode mostrar "O Windows protegeu seu computador" porque o programa nao tem assinatura digital.
+Clique em "Mais informacoes" e depois em "Executar assim mesmo".
+
+
+O QUE PRECISA TER: UM SQL SERVER
+--------------------------------
+O EcoFast guarda os dados em um banco SQL Server. Se voce ja tem um (como o SQL Server Express),
+use a tela de conexao do EcoFast. Se nao tem, de dois cliques em
+"Instalar SQL Server (se precisar).bat": ele baixa o SQL Server Express (gratuito, da Microsoft),
+instala e deixa tudo pronto. Precisa de internet, uns 4 GB livres no disco e da sua senha de administrador.
+
+TELA DE CONEXAO
+---------------
+Na primeira vez o EcoFast mostra a tela "Conexao com o SQL Server". Informe:
+   Servidor: localhost      Porta: 1433      Banco: EcoFast
+   Usuario:  sa             Senha: a senha escolhida na instalacao
+Clique em "Testar e salvar". O EcoFast cria o banco e as tabelas sozinho, com dados de exemplo.
+Depois disso ele nunca mais pergunta (a configuracao fica em %APPDATA%\EcoFast).
+
+
+COMO ENTRAR (senha de todos: 123456)
+------------------------------------
+   Cidada .......... maria@email.com
+   Funcionario ..... funcionario@ecofast.com
+   Administrador ... admin@ecofast.com
+
+Para testar um registro (logado como Funcionario), use o CPF 111.111.111-11, escolha o material,
+digite o peso e clique em "Salvar descarte".
+
+
+PROBLEMAS COMUNS
+----------------
+* "Nao consegui conectar ao servidor": confira se o servico do SQL Server esta ligado
+  (Servicos do Windows > "SQL Server (SQLEXPRESS)") e se o TCP/IP esta habilitado.
+* "Usuario ou senha do SQL Server invalidos": a senha do usuario sa e a que voce escolheu na instalacao.
+* Para trocar a conexao depois: na tela de login, clique em "Conexao com o banco".

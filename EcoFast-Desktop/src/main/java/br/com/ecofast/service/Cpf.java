@@ -1,0 +1,17 @@
+package br.com.ecofast.service;
+
+/** Deixa o CPF sempre no formato 000.000.000-00, como está gravado no banco. */
+public final class Cpf {
+
+    private Cpf() {
+    }
+
+    public static String formatar(String texto) {
+        String digitos = texto == null ? "" : texto.replaceAll("\\D", "");
+        if (digitos.length() != 11) {
+            throw new IllegalArgumentException("O CPF deve ter 11 números.");
+        }
+        return digitos.substring(0, 3) + "." + digitos.substring(3, 6) + "." + digitos.substring(6, 9)
+                + "-" + digitos.substring(9);
+    }
+}

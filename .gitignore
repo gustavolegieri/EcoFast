@@ -3,6 +3,7 @@ target/
 *.class
 *.jar
 dist/
+build/
 out/
 node_modules/
 
@@ -22,3 +23,4 @@ desktop.ini
 
 # configuracao local com senha de banco
 config.properties
+sql-*.txt
