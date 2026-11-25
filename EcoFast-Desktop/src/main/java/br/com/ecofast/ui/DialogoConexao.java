@@ -11,7 +11,6 @@ import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import javax.swing.WindowConstants;
-import java.awt.Color;
 import java.awt.Font;
 import java.awt.Frame;
 import java.util.Optional;
@@ -50,25 +49,26 @@ public final class DialogoConexao extends JDialog {
         conectar.setName("dlgConectar");
 
         JPanel p = new JPanel(new MigLayout("insets 26 30 22 30, wrap 2, fillx", "[grow, fill, 300!][grow, fill, 110!]", ""));
-        p.setBackground(Color.WHITE);
-        p.add(Tema.rotulo("Conexão com o SQL Server", 20, Font.BOLD, Tema.VERDE_900), "span 2");
+        p.setBackground(Tema.PAPEL);
+        p.add(Tema.kicker("Banco de dados", Tema.VERDE), "span 2");
+        p.add(Tema.titulo("Conexão com o SQL Server", 34, Tema.TINTA), "span 2, gaptop 6");
         p.add(Tema.rotulo("<html><div style='width:430px'>O EcoFast guarda tudo em um banco SQL Server. Informe onde ele está. "
-                + "Se o banco ainda não existir, ele é criado agora.</div></html>", 13, Font.PLAIN, Tema.SUAVE), "span 2, gapbottom 12");
+                + "Se o banco ainda não existir, ele é criado agora.</div></html>", 15, Font.PLAIN, Tema.TINTA_SUAVE), "span 2, gaptop 8, gapbottom 14");
 
-        p.add(Tema.rotulo("Servidor", 13, Font.BOLD, Tema.TEXTO));
-        p.add(Tema.rotulo("Porta", 13, Font.BOLD, Tema.TEXTO));
+        p.add(Tema.nomeDoCampo("Servidor"));
+        p.add(Tema.nomeDoCampo("Porta"));
         p.add(servidor);
         p.add(porta);
-        p.add(Tema.rotulo("Exemplos: localhost  ou  MEU-PC\\SQLEXPRESS", 12, Font.PLAIN, Tema.SUAVE), "span 2, gapbottom 6");
+        p.add(Tema.rotulo("Exemplos: localhost  ou  MEU-PC\\SQLEXPRESS", 13, Font.PLAIN, Tema.TINTA_SUAVE), "span 2, gapbottom 8");
 
-        p.add(Tema.rotulo("Banco de dados", 13, Font.BOLD, Tema.TEXTO), "span 2");
+        p.add(Tema.nomeDoCampo("Banco de dados"), "span 2");
         p.add(banco, "span 2, gapbottom 6");
-        p.add(Tema.rotulo("Usuário", 13, Font.BOLD, Tema.TEXTO), "span 2");
+        p.add(Tema.nomeDoCampo("Usuário"), "span 2");
         p.add(usuario, "span 2, gapbottom 6");
-        p.add(Tema.rotulo("Senha", 13, Font.BOLD, Tema.TEXTO), "span 2");
+        p.add(Tema.nomeDoCampo("Senha"), "span 2");
         p.add(senha, "span 2");
 
-        mensagem.setFont(Tema.fonte(13, Font.PLAIN));
+        mensagem.setFont(Tema.fonte(14, Font.BOLD));
         mensagem.setName("dlgMensagem");
         p.add(mensagem, "span 2, gaptop 10");
         if (aviso != null && !aviso.isEmpty()) {
@@ -99,7 +99,7 @@ public final class DialogoConexao extends JDialog {
     }
 
     private void definirMensagem(String texto, boolean ehErro) {
-        mensagem.setForeground(ehErro ? Tema.ERRO : Tema.VERDE_700);
+        mensagem.setForeground(ehErro ? Tema.ALERTA : Tema.VERDE);
         mensagem.setText("<html><div style='width:430px'>" + texto + "</div></html>");
         pack();
     }

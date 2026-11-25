@@ -48,14 +48,22 @@ src/main/java/br/com/ecofast/
 ├─ infra/                     conexão (Banco), configuração (ConfigBanco), criação do banco (BancoSetup)
 ├─ excecao/                   exceções próprias
 └─ ui/                        telas Swing
+   ├─ Tema (cores, fontes, botões), BotaoEco
    ├─ JanelaPrincipal, TelaLogin, DialogoConexao
    ├─ PainelBase (abstrata) ◄── PainelCidadao, PainelFuncionario, PainelRelatorios, PainelAdmin
    ├─ PainelFactory           escolhe o painel pelo perfil de quem entrou
-   └─ componentes/            Cartao, TabelaDados, GraficoBarras, GraficoRosca...
+   └─ componentes/            Cartao, FaixaKpi, Regua, TabelaDados, TicketPesagem, GraficoBarras, GraficoMateriais...
 src/main/resources/db/
 ├─ 01-estrutura.sql           tabelas (T-SQL, roda quantas vezes quiser)
 └─ 02-dados-exemplo.sql       dados de demonstração (só entram no banco novo)
 ```
+
+## Visual
+
+O app usa a mesma identidade da página do projeto: papel, tinta verde, ouro, linhas de 2 px, cantos retos,
+sombra deslocada só no que merece foco, títulos em caixa-alta condensada e números em fonte monoespaçada.
+As fontes são as que o Windows já traz (Bahnschrift, Segoe UI e Consolas), então não há arquivo de fonte para instalar.
+Tudo fica em `ui/Tema.java` e `ui/BotaoEco.java`; os blocos de tela ficam em `ui/componentes/`.
 
 ## Onde estão os pilares de POO
 

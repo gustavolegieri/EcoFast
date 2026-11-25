@@ -6,7 +6,6 @@ import br.com.ecofast.ui.Tema;
 import javax.swing.JComponent;
 import javax.swing.Timer;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.FontMetrics;
@@ -17,11 +16,13 @@ import java.awt.Rectangle;
 import java.awt.RenderingHints;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.awt.geom.RoundRectangle2D;
 import java.time.LocalDate;
 import java.util.List;
 
-/** Gráfico de barras desenhado em Java2D: quilos por dia. Sobe animado e mostra o valor ao passar o mouse. */
+/**
+ * Gráfico de barras desenhado em Java2D: quilos por dia. Barras retas em verde, a do dia de pico em ouro,
+ * linhas de grade tracejadas e a base em tinta. Sobe animado e mostra o valor ao passar o mouse.
+ */
 public class GraficoBarras extends JComponent {
 
     private List<LocalDate> dias = List.of();
@@ -60,6 +61,17 @@ public class GraficoBarras extends JComponent {
         animar();
     }
 
+    /** Índice do dia de maior volume, ou -1 se nenhum dia teve entrega. */
+    public int diaDePico() {
+        int melhor = -1;
+        for (int i = 0; i < valores.length; i++) {
+            if (valores[i] > 0 && (melhor < 0 || valores[i] > valores[melhor])) {
+                melhor = i;
+            }
+        }
+        return melhor;
+    }
+
     private void animar() {
         if (animacao != null) {
             animacao.stop();
@@ -78,7 +90,7 @@ public class GraficoBarras extends JComponent {
     }
 
     private Rectangle area() {
-        int esquerda = 58, direita = 8, topo = 16, base = 30;
+        int esquerda = 70, direita = 4, topo = 14, base = 32;
         return new Rectangle(esquerda, topo, Math.max(10, getWidth() - esquerda - direita),
                 Math.max(10, getHeight() - topo - base));
     }
@@ -110,66 +122,69 @@ public class GraficoBarras extends JComponent {
     @Override
     protected void paintComponent(Graphics g0) {
         Graphics2D g = (Graphics2D) g0.create();
-        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
         Rectangle a = area();
         double passo = passoBonito(maximo() / 4);
         double escala = Math.ceil(maximo() / passo) * passo;
 
-        g.setFont(Tema.fonte(11, Font.PLAIN));
+        g.setFont(Tema.fonteMono(12, Font.PLAIN));
         FontMetrics fm = g.getFontMetrics();
         for (double v = 0; v <= escala + 1e-9; v += passo) {
             int y = a.y + a.height - (int) Math.round(a.height * v / escala);
-            g.setColor(Tema.BORDA);
-            g.setStroke(new BasicStroke(1f));
-            g.drawLine(a.x, y, a.x + a.width, y);
-            String rotulo = Fmt.inteiro(Math.round(v)) + " kg";
-            g.setColor(Tema.SUAVE);
-            g.drawString(rotulo, a.x - 8 - fm.stringWidth(rotulo), y + fm.getAscent() / 2 - 1);
+            if (v > 0) {
+                Tema.tracejado(g, a.x, a.x + a.width, y);
+            }
+            String rotulo = Fmt.inteiro(Math.round(v)) + (v + passo > escala + 1e-9 ? " kg" : "");
+            g.setColor(Tema.TINTA_SUAVE);
+            g.drawString(rotulo, a.x - 12 - fm.stringWidth(rotulo), y + fm.getAscent() / 2 - 1);
         }
 
         int n = valores.length;
-        if (n == 0) {
-            g.dispose();
-            return;
-        }
-        double fatia = a.width / (double) n;
-        double larguraBarra = Math.max(3, fatia * 0.62);
-        g.setClip(a.x - 2, a.y - 6, a.width + 4, a.height + 6);
-        for (int i = 0; i < n; i++) {
-            double altura = a.height * valores[i] / escala * progresso;
-            if (altura < 1) {
-                continue;
+        int pico = diaDePico();
+        if (n > 0) {
+            double fatia = a.width / (double) n;
+            double larguraBarra = Math.max(3, fatia - 4);
+            for (int i = 0; i < n; i++) {
+                double altura = a.height * valores[i] / escala * progresso;
+                if (altura < 1) {
+                    continue;
+                }
+                int x = (int) Math.round(a.x + i * fatia + (fatia - larguraBarra) / 2);
+                int y = (int) Math.round(a.y + a.height - altura);
+                g.setColor(i == destaque ? Tema.TINTA : i == pico ? Tema.OURO : Tema.VERDE);
+                g.fillRect(x, y, (int) Math.round(larguraBarra), (int) Math.round(altura));
             }
-            double x = a.x + i * fatia + (fatia - larguraBarra) / 2;
-            double y = a.y + a.height - altura;
-            g.setColor(i == destaque ? Tema.VERDE_900 : Tema.VERDE_500);
-            g.fill(new RoundRectangle2D.Double(x, y, larguraBarra, altura + 8, 8, 8));
-        }
-        g.setClip(null);
-
-        g.setFont(Tema.fonte(11, Font.PLAIN));
-        g.setColor(Tema.SUAVE);
-        int cada = Math.max(1, (int) Math.ceil(n / 7.0));
-        for (int i = 0; i < n; i += cada) {
-            String rotulo = Fmt.dia(dias.get(i));
-            double centro = a.x + i * fatia + fatia / 2;
-            g.drawString(rotulo, (int) (centro - fm.stringWidth(rotulo) / 2.0), a.y + a.height + 20);
         }
 
-        if (destaque >= 0) {
-            String texto = Fmt.dia(dias.get(destaque)) + "  ·  " + Fmt.kg(valores[destaque]);
-            g.setFont(Tema.fonte(12, Font.BOLD));
-            FontMetrics fb = g.getFontMetrics();
-            int largura = fb.stringWidth(texto) + 20, altura = 28;
-            double centro = a.x + destaque * fatia + fatia / 2;
-            double alturaBarra = a.height * valores[destaque] / escala * progresso;
-            int bx = (int) Math.max(a.x, Math.min(centro - largura / 2.0, a.x + a.width - largura));
-            int by = (int) Math.max(2, a.y + a.height - alturaBarra - altura - 8);
-            g.setColor(new Color(0x1F2A1F));
-            g.fill(new RoundRectangle2D.Double(bx, by, largura, altura, 10, 10));
-            g.setColor(Color.WHITE);
-            g.drawString(texto, bx + 10, by + 19);
+        g.setColor(Tema.TINTA);
+        g.setStroke(new BasicStroke(2f));
+        g.drawLine(a.x, a.y + a.height, a.x + a.width, a.y + a.height);
+
+        if (n > 0) {
+            double fatia = a.width / (double) n;
+            g.setFont(Tema.fonteMono(12, Font.PLAIN));
+            g.setColor(Tema.TINTA_SUAVE);
+            int cada = Math.max(1, (int) Math.ceil(n / 6.0));
+            for (int i = 0; i < n; i += cada) {
+                String rotulo = Fmt.dia(dias.get(i));
+                double centro = a.x + i * fatia + fatia / 2;
+                g.drawString(rotulo, (int) Math.max(a.x, centro - fm.stringWidth(rotulo) / 2.0), a.y + a.height + 22);
+            }
+
+            if (destaque >= 0) {
+                String texto = Fmt.dia(dias.get(destaque)) + "  ·  " + Fmt.kg(valores[destaque]);
+                g.setFont(Tema.fonteMono(13, Font.BOLD));
+                FontMetrics fb = g.getFontMetrics();
+                int largura = fb.stringWidth(texto) + 22, altura = 30;
+                double centro = a.x + destaque * fatia + fatia / 2;
+                double alturaBarra = a.height * valores[destaque] / escala * progresso;
+                int bx = (int) Math.max(a.x, Math.min(centro - largura / 2.0, a.x + a.width - largura));
+                int by = (int) Math.max(2, a.y + a.height - alturaBarra - altura - 8);
+                g.setColor(Tema.TINTA);
+                g.fillRect(bx, by, largura, altura);
+                g.setColor(Tema.PAPEL);
+                g.drawString(texto, bx + 11, by + (altura - fb.getHeight()) / 2 + fb.getAscent());
+            }
         }
         g.dispose();
     }

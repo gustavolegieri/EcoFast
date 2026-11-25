@@ -14,7 +14,12 @@ public abstract class PainelBase extends JPanel {
 
     protected PainelBase() {
         super(new BorderLayout());
-        setBackground(Tema.FUNDO);
+        setBackground(Tema.PAPEL);
+    }
+
+    /** Abas que ficam na barra de cima (só o administrador tem); nulo quando a tela não tem abas. */
+    JComponent abas() {
+        return null;
     }
 
     /** Lê os dados de novo e redesenha a tela. */
@@ -25,7 +30,7 @@ public abstract class PainelBase extends JPanel {
         JScrollPane r = new JScrollPane(conteudo, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
                 JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         r.setBorder(null);
-        r.getViewport().setBackground(Tema.FUNDO);
+        r.getViewport().setBackground(Tema.PAPEL);
         r.getVerticalScrollBar().setUnitIncrement(20);
         return r;
     }

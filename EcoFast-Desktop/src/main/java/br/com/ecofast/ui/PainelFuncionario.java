@@ -7,14 +7,15 @@ import br.com.ecofast.model.material.Material;
 import br.com.ecofast.model.material.MaterialFactory;
 import br.com.ecofast.service.DescarteService;
 import br.com.ecofast.service.ReciboDescarte;
+import br.com.ecofast.ui.componentes.BordaTracejada;
 import br.com.ecofast.ui.componentes.Cartao;
-import br.com.ecofast.ui.componentes.CartaoMaterial;
 import br.com.ecofast.ui.componentes.ConteudoRolavel;
-import br.com.ecofast.ui.componentes.MoedaIcone;
+import br.com.ecofast.ui.componentes.LinhaMaterial;
+import br.com.ecofast.ui.componentes.Marcador;
 import br.com.ecofast.ui.componentes.TabelaDados;
+import br.com.ecofast.ui.componentes.TicketPesagem;
 import net.miginfocom.swing.MigLayout;
 
-import javax.swing.BorderFactory;
 import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JFormattedTextField;
@@ -22,9 +23,12 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
+import javax.swing.SwingConstants;
 import javax.swing.text.MaskFormatter;
-import java.awt.Color;
+import java.awt.BasicStroke;
 import java.awt.Font;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -39,12 +43,14 @@ public class PainelFuncionario extends PainelBase {
 
     private final JFormattedTextField campoCpf;
     private final JLabel achado = new JLabel();
-    private final List<CartaoMaterial> cartoes = new ArrayList<>();
+    private final List<LinhaMaterial> linhas = new ArrayList<>();
     private final JSpinner peso = new JSpinner(new SpinnerNumberModel(1.0, 0.1, 500.0, 0.1));
-    private final JLabel previa = Tema.rotulo(" ", 14, Font.BOLD, Tema.MOEDA);
+    private final JLabel previa = Tema.mono("0", 40, Font.PLAIN, Tema.TINTA);
     private final JLabel erro = new JLabel();
     private final JButton salvar = Tema.botaoPrimario("Salvar descarte");
-    private final Cartao recibo = new Cartao(new MigLayout("insets 0, wrap 2, fillx", "[grow][grow, right]", ""));
+    private final JLabel confirmacao = new JLabel();
+    private final TicketPesagem ticket = new TicketPesagem();
+    private final JPanel reciboBloco = new JPanel(new MigLayout("insets 0, wrap 1, fillx, hidemode 3", "[grow, fill]", ""));
     private final TabelaDados tabela = new TabelaDados("Nenhum registro ainda.",
             new String[]{"Quando", "Cidadão", "Material", "Peso", "Pontos"}, 3, 4);
 
@@ -61,70 +67,88 @@ public class PainelFuncionario extends PainelBase {
         }
         campoCpf.setName("cpf");
         campoCpf.setFocusLostBehavior(JFormattedTextField.PERSIST);
+        campoCpf.setFont(Tema.fonteMono(18, Font.PLAIN));
 
-        ConteudoRolavel corpo = new ConteudoRolavel(new MigLayout("insets 24 28 28 28, fill",
-                "[45%, fill][55%, fill]", "[top]"));
-        corpo.setBackground(Tema.FUNDO);
-        corpo.add(criarFormulario(), "growy, aligny top, gapright 20");
-        corpo.add(criarLadoDireito(), "growy, aligny top");
+        ConteudoRolavel corpo = new ConteudoRolavel(new MigLayout("insets 36 40 44 40, fillx, wrap 2",
+                "[46%, fill][54%, fill]", "[top]"));
+        corpo.setBackground(Tema.PAPEL);
+        corpo.add(criarLadoDoFormulario(), "gapright 32");
+        corpo.add(criarLadoDireito());
         add(rolagem(corpo));
         atualizarPrevia();
     }
 
+    private JPanel criarLadoDoFormulario() {
+        JPanel lado = new JPanel(new MigLayout("insets 0, wrap 1, fillx", "[grow, fill]", ""));
+        lado.setOpaque(false);
+        lado.add(Tema.kicker("Registro de entrega", Tema.VERDE));
+        lado.add(Tema.titulo("Registrar entrega", 52, Tema.TINTA), "gaptop 8");
+        lado.add(Tema.rotulo("<html><div style='width:420px'>Confira o peso na balança antes de salvar. "
+                + "Os pontos são calculados pelo sistema.</div></html>", 15, Font.PLAIN, Tema.TINTA_SUAVE), "gaptop 10, gapbottom 24");
+        lado.add(criarFormulario());
+        return lado;
+    }
+
     private Cartao criarFormulario() {
         Cartao c = new Cartao(new MigLayout("insets 0, wrap 1, fillx, hidemode 3", "[grow, fill]", ""));
-        c.add(Tema.rotulo("Registrar entrega de material", 20, Font.BOLD, Tema.VERDE_900));
-        c.add(Tema.rotulo("<html><div style='width:420px'>Confira o peso na balança antes de salvar. "
-                + "Os pontos são calculados pelo sistema.</div></html>", 13, Font.PLAIN, Tema.SUAVE), "gaptop 2");
 
-        c.add(Tema.rotulo("CPF do cidadão", 13, Font.BOLD, Tema.TEXTO), "gaptop 18");
+        // 01 · cidadão
+        c.add(passo("01", "Cidadão"));
+        c.add(Tema.nomeDoCampo("CPF do cidadão"), "gaptop 10");
         JPanel linhaCpf = new JPanel(new MigLayout("insets 0, fillx", "[grow, fill][]", "[]"));
         linhaCpf.setOpaque(false);
-        linhaCpf.add(campoCpf, "gapright 8");
+        linhaCpf.add(campoCpf, "gapright 10");
         JButton buscar = Tema.botaoSecundario("Buscar");
         buscar.setName("buscar");
         buscar.addActionListener(e -> buscarCidadao());
         campoCpf.addActionListener(e -> buscarCidadao());
         linhaCpf.add(buscar);
-        c.add(linhaCpf, "gaptop 4");
+        c.add(linhaCpf, "gaptop 6");
         achado.setVisible(false);
         achado.setOpaque(true);
-        achado.setBackground(Tema.VERDE_50);
-        achado.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Tema.VERDE_300), BorderFactory.createEmptyBorder(8, 12, 8, 12)));
-        c.add(achado, "gaptop 8");
-        c.add(Tema.rotulo("Exemplos: 111.111.111-11 · 222.222.222-22 · 333.333.333-33", 12, Font.PLAIN, Tema.SUAVE), "gaptop 6");
+        achado.setBackground(Tema.PAPEL_2);
+        achado.setBorder(new BordaTracejada(10));
+        c.add(achado, "gaptop 10");
 
-        c.add(Tema.rotulo("Tipo de material", 13, Font.BOLD, Tema.TEXTO), "gaptop 18");
-        JPanel grade = new JPanel(new MigLayout("insets 0, fillx", "[grow, fill][grow, fill][grow, fill][grow, fill][grow, fill]", "[]"));
-        grade.setOpaque(false);
+        // 02 · material
+        c.add(passo("02", "Material"), "gaptop 30");
+        JPanel lista = new JPanel(new MigLayout("insets 0, wrap 1, fillx, gap 4", "[grow, fill]", ""));
+        lista.setOpaque(false);
+        lista.getAccessibleContext().setAccessibleName("Tipo de material");
         ButtonGroup grupo = new ButtonGroup();
         for (Material m : MaterialFactory.todos()) {
-            CartaoMaterial cartao = new CartaoMaterial(m);
-            cartao.addActionListener(e -> atualizarPrevia());
-            grupo.add(cartao);
-            cartoes.add(cartao);
-            grade.add(cartao, "grow, gapx 0 6");
+            LinhaMaterial linha = new LinhaMaterial(m);
+            linha.addActionListener(e -> atualizarPrevia());
+            grupo.add(linha);
+            linhas.add(linha);
+            lista.add(linha);
         }
-        cartoes.get(1).setSelected(true);
-        c.add(grade, "gaptop 6");
+        linhas.get(1).setSelected(true);
+        c.add(lista, "gaptop 10");
 
-        c.add(Tema.rotulo("Peso conferido na balança (kg)", 13, Font.BOLD, Tema.TEXTO), "gaptop 18");
+        // 03 · peso
+        c.add(passo("03", "Peso"), "gaptop 26");
+        c.add(Tema.nomeDoCampo("Peso conferido na balança"), "gaptop 10");
         JSpinner.NumberEditor editor = new JSpinner.NumberEditor(peso, "0.0");
         ((DecimalFormat) editor.getFormat()).setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Fmt.ptBr()));
+        editor.getTextField().setFont(Tema.fonteMono(26, Font.PLAIN));
+        editor.getTextField().setHorizontalAlignment(SwingConstants.RIGHT);
         peso.setEditor(editor);
         peso.setName("peso");
         peso.addChangeListener(e -> atualizarPrevia());
-        c.add(peso, "w 160!, gaptop 6");
-        previa.setIcon(new MoedaIcone(18));
-        previa.setIconTextGap(8);
-        c.add(previa, "gaptop 12");
+        JPanel linhaPeso = new JPanel(new MigLayout("insets 0", "[200!][]", "[]"));
+        linhaPeso.setOpaque(false);
+        linhaPeso.add(peso, "growx, h 56!");
+        linhaPeso.add(Tema.mono("kg", 22, Font.PLAIN, Tema.TINTA), "gapleft 12");
+        c.add(linhaPeso, "gaptop 6");
 
-        erro.setForeground(Tema.ERRO);
-        erro.setFont(Tema.fonte(13, Font.PLAIN));
+        c.add(criarFaixaDaPrevia(), "gaptop 26, growx");
+
+        erro.setForeground(Tema.ALERTA);
+        erro.setFont(Tema.fonte(14, Font.BOLD));
         erro.setName("erroRegistro");
         erro.setVisible(false);
-        c.add(erro, "gaptop 8");
+        c.add(erro, "gaptop 10");
 
         salvar.setName("salvar");
         salvar.addActionListener(e -> salvar());
@@ -132,25 +156,66 @@ public class PainelFuncionario extends PainelBase {
         return c;
     }
 
+    /** Número de passo em verde e o nome do passo em título condensado. */
+    private JPanel passo(String numero, String titulo) {
+        JPanel p = new JPanel(new MigLayout("insets 0", "[]12[]", "[]"));
+        p.setOpaque(false);
+        p.add(Tema.mono(numero, 30, Font.PLAIN, Tema.VERDE));
+        p.add(Tema.titulo(titulo, 26, Tema.TINTA), "aligny center");
+        return p;
+    }
+
+    /** Faixa dourada que mostra, antes de salvar, quanto a entrega vai valer. */
+    private JPanel criarFaixaDaPrevia() {
+        JPanel faixa = new JPanel(new MigLayout("insets 14 18 14 18, fillx", "[grow][][]", "[]")) {
+            @Override
+            protected void paintComponent(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                g2.setColor(Tema.OURO);
+                g2.fillRect(0, 0, getWidth(), getHeight());
+                g2.setColor(Tema.TINTA);
+                g2.setStroke(new BasicStroke(2f));
+                g2.drawRect(1, 1, getWidth() - 2, getHeight() - 2);
+                g2.dispose();
+            }
+        };
+        faixa.setOpaque(false);
+        faixa.add(Tema.rotulo("Esta entrega vale", 15, Font.BOLD, Tema.TINTA), "aligny center");
+        previa.setName("previa");
+        faixa.add(previa, "aligny center");
+        faixa.add(Tema.kicker("EcoCoins", Tema.TINTA), "aligny center");
+        return faixa;
+    }
+
     private JPanel criarLadoDireito() {
-        JPanel lado = new JPanel(new MigLayout("insets 0, wrap 1, fillx, hidemode 3", "[grow, fill]", ""));
+        JPanel lado = new JPanel(new MigLayout("insets 6 0 0 0, wrap 1, fillx, hidemode 3", "[grow, fill]", ""));
         lado.setOpaque(false);
 
-        recibo.cores(Tema.VERDE_50, Tema.VERDE_500, 2f);
-        recibo.setVisible(false);
-        lado.add(recibo, "gapbottom 16");
+        reciboBloco.setOpaque(false);
+        confirmacao.setFont(Tema.fonteMono(13, Font.PLAIN));
+        confirmacao.setForeground(Tema.TINTA);
+        confirmacao.setIcon(new Marcador(Tema.FOLHA, 11));
+        confirmacao.setIconTextGap(9);
+        reciboBloco.add(confirmacao, "gapbottom 4");
+        reciboBloco.add(ticket, "growx");
+        reciboBloco.setVisible(false);
+        lado.add(reciboBloco, "gapbottom 30");
 
         Cartao historico = new Cartao(new MigLayout("insets 0, fillx, wrap 1", "[grow, fill]", ""));
-        historico.add(Tema.rotulo("Últimos registros neste ecoponto", 17, Font.BOLD, Tema.VERDE_900));
-        tabela.larguras(21, 26, 21, 16, 16);
+        JPanel titulo = new JPanel(new MigLayout("insets 0, fillx", "[grow][]"));
+        titulo.setOpaque(false);
+        titulo.add(Tema.titulo("Últimos registros", 26, Tema.TINTA));
+        titulo.add(Tema.mono("neste ecoponto", 12, Font.PLAIN, Tema.TINTA_SUAVE), "aligny bottom");
+        historico.add(titulo);
+        tabela.larguras(21, 24, 23, 17, 15);
         tabela.alturaParaLinhas(6);
-        historico.add(tabela, "gaptop 10");
+        historico.add(tabela, "gaptop 14");
         lado.add(historico);
         return lado;
     }
 
     private Material selecionado() {
-        return cartoes.stream().filter(CartaoMaterial::isSelected).map(CartaoMaterial::getMaterial).findFirst().orElse(null);
+        return linhas.stream().filter(LinhaMaterial::isSelected).map(LinhaMaterial::getMaterial).findFirst().orElse(null);
     }
 
     private double pesoDigitado() {
@@ -161,16 +226,16 @@ public class PainelFuncionario extends PainelBase {
     private void atualizarPrevia() {
         Material m = selecionado();
         if (m == null) {
-            previa.setText(" ");
+            previa.setText("0");
             return;
         }
         int pontos = m.calcularPontos(Math.round(pesoDigitado() * 100.0) / 100.0);
-        previa.setText("Esta entrega vale " + Fmt.inteiro(pontos) + " EcoCoins");
+        previa.setText(Fmt.inteiro(pontos));
     }
 
     private void mostrarErro(String texto) {
         boolean tem = texto != null && !texto.isEmpty();
-        erro.setText(tem ? "<html><div style='width:340px'>" + texto + "</div></html>" : "");
+        erro.setText(tem ? "<html><div style='width:420px'>" + texto + "</div></html>" : "");
         erro.setVisible(tem);
     }
 
@@ -184,10 +249,10 @@ public class PainelFuncionario extends PainelBase {
     }
 
     private void mostrarAchado(Cidadao c) {
-        achado.setText("<html><b>" + c.getNome() + "</b> · saldo atual de <b>" + Fmt.inteiro(c.getSaldoEcoCoins())
-                + "</b> EcoCoins</html>");
-        achado.setFont(Tema.fonte(13, Font.PLAIN));
-        achado.setForeground(Tema.VERDE_900);
+        achado.setText("<html><b>" + c.getNome() + "</b> &nbsp;<font color='#3D5646'>saldo atual</font> &nbsp;<b>"
+                + Fmt.inteiro(c.getSaldoEcoCoins()) + "</b> EcoCoins</html>");
+        achado.setFont(Tema.fonte(15, Font.PLAIN));
+        achado.setForeground(Tema.TINTA);
         achado.setVisible(true);
     }
 
@@ -214,39 +279,23 @@ public class PainelFuncionario extends PainelBase {
     }
 
     private void mostrarRecibo(ReciboDescarte r) {
-        recibo.removeAll();
-        recibo.add(Tema.rotulo("Descarte nº " + r.descarte().getId() + " registrado com sucesso!", 16, Font.BOLD,
-                Tema.VERDE_900), "span 2, wrap 10");
-        linha("Cidadão", r.cidadao());
-        linha("Material", r.descarte().getMaterial().getNome());
-        linha("Peso", Fmt.kg(r.descarte().getPesoKg()));
-        linha("Ecoponto", r.ecoponto());
-        linha("Data", Fmt.dataHora(r.descarte().getDataHora()));
-
-        Cartao ganho = new Cartao(new MigLayout("insets 0, fillx", "[grow][]", "[]")).cores(Color.WHITE, Tema.BORDA, 1f);
-        ganho.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 14));
-        ganho.add(Tema.rotulo("Pontos ganhos  +" + Fmt.inteiro(r.descarte().getPontos()), 15, Font.BOLD, Tema.MOEDA));
-        ganho.add(Tema.rotulo("Novo saldo  " + Fmt.inteiro(r.novoSaldo()), 15, Font.BOLD, Tema.MOEDA));
-        recibo.add(ganho, "span 2, growx, gaptop 12");
-        recibo.setVisible(true);
-        recibo.revalidate();
-        recibo.repaint();
-    }
-
-    private void linha(String nome, String valor) {
-        recibo.add(Tema.rotulo(nome, 13, Font.PLAIN, Tema.SUAVE), "gaptop 2");
-        recibo.add(Tema.rotulo(valor, 13, Font.BOLD, Tema.TEXTO), "gaptop 2");
+        confirmacao.setText("Descarte nº " + r.descarte().getId() + " registrado com sucesso");
+        ticket.mostrar(r, operador.getNome());
+        reciboBloco.setVisible(true);
+        reciboBloco.revalidate();
+        reciboBloco.repaint();
     }
 
     @Override
     public void atualizar() {
         Tarefa.executar(() -> servico.ultimosRegistros(operador), registros -> {
-            List<Object[]> linhas = new ArrayList<>();
+            List<Object[]> dados = new ArrayList<>();
             for (RegistroRecente r : registros) {
-                linhas.add(new Object[]{Fmt.dataHoraCurta(r.dataHora()), r.cidadao(), Tema.nomeCurto(r.material()),
+                dados.add(new Object[]{Fmt.dataHoraCurta(r.dataHora()), r.cidadao(),
+                        new TabelaDados.CelulaMaterial(Tema.nomeCurto(r.material()), Tema.corDoMaterial(r.material())),
                         Fmt.kg(r.pesoKg()), "+" + Fmt.inteiro(r.pontos())});
             }
-            tabela.setLinhas(linhas);
+            tabela.setLinhas(dados);
         }, this::avisar);
     }
 }

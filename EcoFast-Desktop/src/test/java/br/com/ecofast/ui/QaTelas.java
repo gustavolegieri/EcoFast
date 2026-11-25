@@ -36,7 +36,16 @@ public final class QaTelas {
     public static void main(String[] args) throws Exception {
         saida = Path.of(args[0]);
         Files.createDirectories(saida);
-        ConfigBanco base = ConfigBanco.carregar().orElseThrow(() -> new IllegalStateException("sem config"));
+        // Sem config salva, vale o que vier nas variáveis ECOFAST_QA_* (a senha nunca vai na linha de comando).
+        ConfigBanco base = ConfigBanco.carregar().orElseGet(() -> {
+            String senha = System.getenv("ECOFAST_QA_SENHA");
+            if (senha == null) {
+                throw new IllegalStateException("sem config salva e sem ECOFAST_QA_SENHA");
+            }
+            return new ConfigBanco(System.getenv().getOrDefault("ECOFAST_QA_SERVIDOR", "localhost"),
+                    Integer.parseInt(System.getenv().getOrDefault("ECOFAST_QA_PORTA", "1433")),
+                    ConfigBanco.BANCO_PADRAO, System.getenv().getOrDefault("ECOFAST_QA_USUARIO", "sa"), senha);
+        });
         ConfigBanco qa = base.comBanco(BANCO_QA);
         apagar(qa);
         BancoSetup.garantir(qa);
@@ -49,6 +58,7 @@ public final class QaTelas {
         foto(janela, "q01-login");
 
         // ---- cidadã ----
+        clicar(janela, "alternadorDemo");
         clicar(janela, "demoCidada");
         foto(janela, "q02-login-preenchido");
         clicar(janela, "botaoEntrar");
@@ -56,6 +66,7 @@ public final class QaTelas {
         esperar("extrato carregado", () -> existeTexto(janela, "para o desconto"), 8000);
         Thread.sleep(300);
         foto(janela, "q03-cidadao");
+        fotoCompleta(janela, "f03-cidadao");
         clicar(janela, "botaoSair");
 
         // ---- senha errada ----
@@ -81,6 +92,7 @@ public final class QaTelas {
         naEdt(() -> achar(janela, "peso", JSpinner.class).setValue(2.5));
         Thread.sleep(200);
         foto(janela, "q06-formulario");
+        fotoCompleta(janela, "f06-formulario");
         clicar(janela, "salvar");
         esperar("recibo", () -> existeTexto(janela, "registrado com sucesso"), 8000);
         Thread.sleep(600);
@@ -98,19 +110,21 @@ public final class QaTelas {
         esperar("relatório carregado", () -> existeTexto(janela, "últimos 30 dias"), 8000);
         Thread.sleep(1500);
         foto(janela, "q09-admin");
+        fotoCompleta(janela, "f09-admin");
         Component barras = acharPorClasse(janela, "GraficoBarras");
         int x = barras.getWidth() - 120, y = barras.getHeight() - 70;
         naEdt(() -> barras.dispatchEvent(new MouseEvent(barras, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0, x, y, 0, false)));
         Thread.sleep(250);
         foto(janela, "q10-admin-hover-barra");
-        Component rosca = acharPorClasse(janela, "GraficoRosca");
-        int rx = (int) (rosca.getWidth() * 0.52 * 0.5) + 14, ry = rosca.getHeight() / 2 - (int) (rosca.getWidth() * 0.52 * 0.38);
-        naEdt(() -> rosca.dispatchEvent(new MouseEvent(rosca, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0, rx, ry, 0, false)));
+        Component materiais = acharPorClasse(janela, "GraficoMateriais");
+        int mx = materiais.getWidth() / 2, my = 20;
+        naEdt(() -> materiais.dispatchEvent(new MouseEvent(materiais, MouseEvent.MOUSE_MOVED, System.currentTimeMillis(), 0, mx, my, 0, false)));
         Thread.sleep(250);
-        foto(janela, "q11-admin-hover-rosca");
+        foto(janela, "q11-admin-hover-material");
         naEdt(() -> achar(janela, "abas", JTabbedPane.class).setSelectedIndex(1));
         Thread.sleep(900);
         foto(janela, "q12-admin-registro");
+        fotoCompleta(janela, "f12-admin-registro");
         naEdt(() -> achar(janela, "abas", JTabbedPane.class).setSelectedIndex(0));
         Thread.sleep(900);
         clicar(janela, "botaoSair");
@@ -271,6 +285,34 @@ public final class QaTelas {
                 c.paint(g);
                 g.dispose();
                 ImageIO.write(img, "png", saida.resolve(nome + ".png").toFile());
+            } catch (Exception e) {
+                throw new IllegalStateException(e);
+            }
+        });
+        System.out.println("foto " + nome);
+    }
+
+    /** Foto da tela inteira, inclusive o que fica abaixo da dobra (a janela só mostra o pedaço visível). */
+    private static void fotoCompleta(Container janela, String nome) throws Exception {
+        naEdt(() -> {
+            try {
+                Container c = (Container) acharPorClasse(janela, "ConteudoRolavel");
+                java.awt.Dimension original = c.getSize();
+                int largura = original.width;
+                c.setSize(largura, 4000);
+                c.validate();
+                int altura = c.getPreferredSize().height;
+                c.setSize(largura, altura);
+                c.validate();
+                BufferedImage img = new BufferedImage(largura, altura, BufferedImage.TYPE_INT_RGB);
+                Graphics2D g = img.createGraphics();
+                g.setColor(java.awt.Color.WHITE);
+                g.fillRect(0, 0, largura, altura);
+                c.paint(g);
+                g.dispose();
+                ImageIO.write(img, "png", saida.resolve(nome + ".png").toFile());
+                c.setSize(original);
+                c.validate();
             } catch (Exception e) {
                 throw new IllegalStateException(e);
             }

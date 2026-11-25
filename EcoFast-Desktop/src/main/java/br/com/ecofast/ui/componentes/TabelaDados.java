@@ -1,16 +1,18 @@
 package br.com.ecofast.ui.componentes;
 
 import br.com.ecofast.ui.Tema;
+import br.com.ecofast.ui.Texto;
 
 import javax.swing.BorderFactory;
-import javax.swing.JLabel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.border.AbstractBorder;
+import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -24,11 +26,23 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * Tabela só de leitura, com o visual do EcoFast. Não tem barra de rolagem própria
- * (a tela inteira é que rola), as colunas dividem a largura em proporções que a
- * tela define, e quando está vazia mostra um aviso.
+ * Tabela só de leitura, no estilo do recibo e com as medidas da página: cabeçalho de 35 px em caixa-alta
+ * pequena com linha de tinta, linhas de 46 px separadas por tracejado, números em fonte monoespaçada.
+ * Não tem barra de rolagem própria (a tela inteira é que rola), as colunas dividem a largura em proporções
+ * que a tela define e, quando está vazia, mostra um aviso.
  */
 public class TabelaDados extends JScrollPane {
+
+    /** Valor de célula que mostra o quadradinho da cor do material ao lado do nome. */
+    public record CelulaMaterial(String nome, Color cor) {
+        @Override
+        public String toString() {
+            return nome;
+        }
+    }
+
+    private static final int ALTURA_LINHA = 47;
+    private static final int ALTURA_CABECALHO = 35;
 
     private final DefaultTableModel modelo;
     private final JTable tabela;
@@ -36,7 +50,13 @@ public class TabelaDados extends JScrollPane {
     private int minimoDeLinhas = 3;
     private int[] pesos;
 
+    /** colunasNumericas: alinhadas à direita e em fonte monoespaçada. */
     public TabelaDados(String vazio, String[] colunas, int... colunasNumericas) {
+        this(vazio, colunas, new int[0], colunasNumericas);
+    }
+
+    /** colunasMono: texto em fonte monoespaçada alinhado à esquerda (datas, posições). */
+    public TabelaDados(String vazio, String[] colunas, int[] colunasMono, int[] colunasNumericas) {
         this.vazio = vazio;
         modelo = new DefaultTableModel(colunas, 0) {
             @Override
@@ -52,7 +72,7 @@ public class TabelaDados extends JScrollPane {
                     Graphics2D g2 = (Graphics2D) g.create();
                     g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
                     g2.setFont(Tema.fonte(14, Font.PLAIN));
-                    g2.setColor(Tema.SUAVE);
+                    g2.setColor(Tema.TINTA_SUAVE);
                     int largura = g2.getFontMetrics().stringWidth(TabelaDados.this.vazio);
                     g2.drawString(TabelaDados.this.vazio, Math.max(8, (getWidth() - largura) / 2), 34);
                     g2.dispose();
@@ -60,55 +80,64 @@ public class TabelaDados extends JScrollPane {
             }
         };
         tabela.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
-        tabela.setRowHeight(34);
-        tabela.setShowVerticalLines(false);
-        tabela.setShowHorizontalLines(true);
-        tabela.setGridColor(Tema.BORDA);
-        tabela.setIntercellSpacing(new Dimension(0, 1));
+        tabela.setRowHeight(ALTURA_LINHA);
+        tabela.setShowGrid(false);
+        tabela.setIntercellSpacing(new Dimension(0, 0));
         tabela.setFocusable(false);
         tabela.setRowSelectionAllowed(false);
         tabela.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         tabela.setFillsViewportHeight(true);
-        tabela.setBackground(Color.WHITE);
-        tabela.setFont(Tema.fonte(14, Font.PLAIN));
+        tabela.setBackground(Tema.BRANCO);
         tabela.getTableHeader().setReorderingAllowed(false);
         tabela.getTableHeader().setResizingAllowed(false);
 
-        final int[] numericas = colunasNumericas;
-        DefaultTableCellRenderer celula = new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object valor, boolean sel, boolean foco, int l, int c) {
-                super.getTableCellRendererComponent(t, valor, false, false, l, c);
-                setBorder(new EmptyBorder(0, 10, 0, 10));
-                setHorizontalAlignment(ehNumerica(numericas, c) ? SwingConstants.RIGHT : SwingConstants.LEFT);
-                setForeground(Tema.TEXTO);
-                return this;
+        TableCellRenderer celula = (t, valor, sel, foco, l, c) -> {
+            boolean numerica = ehDa(colunasNumericas, c);
+            boolean mono = numerica || ehDa(colunasMono, c);
+            String texto = valor == null ? "" : valor.toString();
+            Texto r = new Texto(texto);
+            r.setOpaque(true);
+            r.setBackground(Tema.BRANCO);
+            r.linha(22.5f);
+            r.setHorizontalAlignment(numerica ? SwingConstants.RIGHT : SwingConstants.LEFT);
+            r.setBorder(new CompoundBorder(new LinhaTracejada(l < t.getRowCount() - 1), new EmptyBorder(0, 0, 2, 0)));
+            if (valor instanceof CelulaMaterial m) {
+                r.setIcon(new Marcador(m.cor(), 12));
+                r.setIconTextGap(8);
+                r.setFont(Tema.fontePeso(15, 600));
+                r.setForeground(Tema.TINTA);
+            } else if (mono) {
+                boolean ganho = texto.startsWith("+");
+                r.setFont(Tema.fonteMono(15, ganho ? Font.BOLD : Font.PLAIN));
+                r.setForeground(ganho ? Tema.VERDE : Tema.TINTA);
+            } else {
+                r.setFont(Tema.fonte(15, Font.PLAIN));
+                r.setForeground(Tema.TINTA);
             }
+            return r;
         };
         for (int i = 0; i < colunas.length; i++) {
             tabela.getColumnModel().getColumn(i).setCellRenderer(celula);
         }
-        tabela.getTableHeader().setDefaultRenderer(new DefaultTableCellRenderer() {
-            @Override
-            public Component getTableCellRendererComponent(JTable t, Object valor, boolean sel, boolean foco, int l, int c) {
-                JLabel r = (JLabel) super.getTableCellRendererComponent(t, valor == null ? "" : valor.toString().toUpperCase(),
-                        false, false, l, c);
-                r.setFont(Tema.fonte(11, Font.BOLD));
-                r.setForeground(Tema.SUAVE);
-                r.setBackground(Color.WHITE);
-                r.setBorder(new javax.swing.border.CompoundBorder(
-                        new javax.swing.border.MatteBorder(0, 0, 2, 0, Tema.BORDA), new EmptyBorder(8, 10, 8, 10)));
-                r.setHorizontalAlignment(ehNumerica(numericas, c) ? SwingConstants.RIGHT : SwingConstants.LEFT);
-                return r;
-            }
+        tabela.getTableHeader().setDefaultRenderer((t, valor, sel, foco, l, c) -> {
+            Texto r = new Texto(valor == null ? "" : valor.toString().toUpperCase());
+            r.setFont(Tema.fonteMono(11.5f, Font.PLAIN, 0.08f));
+            r.setForeground(Tema.TINTA_SUAVE);
+            r.setOpaque(true);
+            r.setBackground(Tema.BRANCO);
+            r.linha(17.25f);
+            r.setBorder(new CompoundBorder(new LinhaDeBaixo(), new EmptyBorder(8, 0, 8, 0)));
+            r.setHorizontalAlignment(ehDa(colunasNumericas, c) ? SwingConstants.RIGHT : SwingConstants.LEFT);
+            return r;
         });
+        tabela.getTableHeader().setPreferredSize(new Dimension(100, ALTURA_CABECALHO));
 
         setViewportView(tabela);
         // Uma borda vazia (e não null): com null o JTable troca por uma moldura cinza ao ser adicionado.
         setBorder(BorderFactory.createEmptyBorder());
         setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);
         setHorizontalScrollBarPolicy(HORIZONTAL_SCROLLBAR_NEVER);
-        getViewport().setBackground(Color.WHITE);
+        getViewport().setBackground(Tema.BRANCO);
         setOpaque(false);
         getViewport().setOpaque(false);
         getViewport().addComponentListener(new ComponentAdapter() {
@@ -120,8 +149,47 @@ public class TabelaDados extends JScrollPane {
         recalcularAltura();
     }
 
-    private static boolean ehNumerica(int[] numericas, int coluna) {
-        return Arrays.stream(numericas).anyMatch(n -> n == coluna);
+    /** Borda de baixo tracejada, a que separa as linhas (a última linha não leva). */
+    private static final class LinhaTracejada extends AbstractBorder {
+        private final boolean ligada;
+
+        LinhaTracejada(boolean ligada) {
+            this.ligada = ligada;
+        }
+
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int largura, int altura) {
+            if (!ligada) {
+                return;
+            }
+            Graphics2D g2 = (Graphics2D) g.create();
+            Tema.tracejado(g2, x, x + largura, y + altura - 1);
+            g2.dispose();
+        }
+    }
+
+    /** Linha de 2 px em tinta embaixo do cabeçalho. */
+    private static final class LinhaDeBaixo extends AbstractBorder {
+        @Override
+        public void paintBorder(Component c, Graphics g, int x, int y, int largura, int altura) {
+            g.setColor(Tema.TINTA);
+            g.fillRect(x, y + altura - 2, largura, 2);
+        }
+
+        @Override
+        public java.awt.Insets getBorderInsets(Component c) {
+            return new java.awt.Insets(0, 0, 2, 0);
+        }
+    }
+
+    private static boolean ehDa(int[] colunas, int coluna) {
+        return Arrays.stream(colunas).anyMatch(n -> n == coluna);
+    }
+
+    @Override
+    public void doLayout() {
+        super.doLayout();
+        ajustarLarguras();
     }
 
     /** Define quanto da largura cada coluna ocupa (só as proporções importam). */
@@ -155,7 +223,7 @@ public class TabelaDados extends JScrollPane {
         return modelo.getRowCount();
     }
 
-    /** Altura mínima da tabela, em linhas, para os cartões ao lado não ficarem desproporcionais. */
+    /** Altura mínima da tabela, em linhas, para os blocos ao lado não ficarem desproporcionais. */
     public void alturaParaLinhas(int linhas) {
         this.minimoDeLinhas = linhas;
         recalcularAltura();
@@ -163,8 +231,7 @@ public class TabelaDados extends JScrollPane {
 
     private void recalcularAltura() {
         int linhas = Math.max(minimoDeLinhas, modelo.getRowCount());
-        int cabecalho = tabela.getTableHeader().getPreferredSize().height;
-        setPreferredSize(new Dimension(300, cabecalho + linhas * (tabela.getRowHeight() + 1) + 2));
+        setPreferredSize(new Dimension(300, ALTURA_CABECALHO + linhas * ALTURA_LINHA));
         revalidate();
     }
 }

@@ -3,17 +3,14 @@ package br.com.ecofast.ui;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import java.awt.BasicStroke;
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.GradientPaint;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.RenderingHints;
-import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Path2D;
-import java.awt.geom.RoundRectangle2D;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -25,7 +22,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * O logo do EcoFast (uma folha com uma moeda), desenhado em código. Serve para a
+ * O logo do EcoFast (uma folha num quadrado verde), desenhado em código. Serve para a
  * janela, para o cabeçalho e, rodando esta classe, para gerar o icon.ico do .exe.
  */
 public final class Icone {
@@ -35,35 +32,38 @@ public final class Icone {
     private Icone() {
     }
 
-    /** Desenha o logo num quadrado de lado "lado", a partir do ponto (0,0). */
+    /** O logo na versão escura (quadrado verde, folha branca): topo das telas, janela e ícone do .exe. */
     public static void desenhar(Graphics2D g0, double lado) {
+        desenhar(g0, lado, false);
+    }
+
+    /**
+     * Desenha o logo num quadrado de lado "lado", a partir do ponto (0,0), com as medidas do SVG da página
+     * (grade de 34). Na versão clara (sobre fundo verde) o quadrado é branco e a folha é verde.
+     */
+    public static void desenhar(Graphics2D g0, double lado, boolean claro) {
         Graphics2D g = (Graphics2D) g0.create();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_STROKE_CONTROL, RenderingHints.VALUE_STROKE_PURE);
-        g.scale(lado / 256.0, lado / 256.0);
+        g.scale(lado / 34.0, lado / 34.0);
 
-        g.setPaint(new GradientPaint(0, 0, Tema.VERDE_500, 256, 256, Tema.VERDE_900));
-        g.fill(new RoundRectangle2D.Double(6, 6, 244, 244, 66, 66));
+        g.setColor(claro ? Tema.BRANCO : Tema.VERDE);
+        g.fill(new Rectangle2D.Double(1, 1, 32, 32));
+        g.setColor(Tema.TINTA);
+        g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g.draw(new Rectangle2D.Double(1, 1, 32, 32));
 
         Path2D folha = new Path2D.Double();
-        folha.moveTo(58, 198);
-        folha.curveTo(48, 110, 110, 56, 200, 52);
-        folha.curveTo(208, 138, 154, 200, 58, 198);
+        folha.moveTo(9, 24);
+        folha.curveTo(9, 16, 14, 11, 25, 10);
+        folha.curveTo(24, 19, 20, 24, 12, 24);
         folha.closePath();
-        g.setColor(Color.WHITE);
+        g.setColor(claro ? Tema.VERDE : Tema.BRANCO);
         g.fill(folha);
 
-        g.setColor(Tema.VERDE_700);
-        g.setStroke(new BasicStroke(9, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
-        g.draw(new Line2D.Double(76, 182, 152, 106));
-
-        g.setColor(new Color(0xC77F00));
-        g.fill(new Ellipse2D.Double(142, 142, 92, 92));
-        g.setColor(Tema.MOEDA_COR);
-        g.fill(new Ellipse2D.Double(148, 148, 80, 80));
-        g.setColor(new Color(0xE69500));
-        g.setStroke(new BasicStroke(7));
-        g.draw(new Ellipse2D.Double(163, 163, 50, 50));
+        g.setColor(claro ? Tema.BRANCO : Tema.VERDE);
+        g.setStroke(new BasicStroke(2, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g.draw(new Line2D.Double(9, 25, 18, 16));
         g.dispose();
     }
 
@@ -77,12 +77,16 @@ public final class Icone {
 
     /** Ícone vetorial: fica nítido em qualquer zoom do Windows. */
     public static Icon vetorial(int lado) {
+        return vetorial(lado, false);
+    }
+
+    public static Icon vetorial(int lado, boolean claro) {
         return new Icon() {
             @Override
             public void paintIcon(Component c, Graphics g, int x, int y) {
                 Graphics2D g2 = (Graphics2D) g.create();
                 g2.translate(x, y);
-                desenhar(g2, lado);
+                desenhar(g2, lado, claro);
                 g2.dispose();
             }
 

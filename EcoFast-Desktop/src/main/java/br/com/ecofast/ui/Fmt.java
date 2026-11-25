@@ -33,6 +33,11 @@ public final class Fmt {
         return decimal(v) + " kg";
     }
 
+    /** Só a data, como no extrato do desenho: 14/11/2026. */
+    public static String data(LocalDateTime d) {
+        return d.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", PT_BR));
+    }
+
     public static String dataHora(LocalDateTime d) {
         return d.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", PT_BR));
     }
