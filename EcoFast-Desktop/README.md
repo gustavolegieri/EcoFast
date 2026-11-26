@@ -78,7 +78,7 @@ Tudo fica em `ui/Tema.java` e `ui/BotaoEco.java`; os blocos de tela ficam em `ui
 
 ## Regras do programa
 
-- 10.000 EcoCoins = 10% de desconto no IPTU.
+- A cada 1.000 EcoCoins, 10% de desconto no IPTU, proporcional (100 = 1%), máximo de 100%.
 - Só o funcionário registra a entrega, depois de pesar. O cidadão apenas consulta.
 - Pontos por quilo (valores de exemplo): papel 5, vidro 8, plástico 10, metal 15, eletrônico 25 (+20 por entrega).
 - A gravação da entrega (descarte + saldo) é uma única transação, e a linha do cidadão é travada

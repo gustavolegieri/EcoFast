@@ -16,6 +16,17 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RegrasDeNegocioTest {
 
     @Test
+    void descontoDeIptuCresceUmPorcentoACadaCemEcoCoins() {
+        int[][] casos = { // saldo, desconto, pontos para mais 1%
+                {0, 0, 100}, {99, 0, 1}, {358, 3, 42}, {1000, 10, 100}, {2500, 25, 100},
+                {9999, 99, 1}, {10000, 100, 0}, {15000, 100, 0}};
+        for (int[] c : casos) {
+            org.junit.jupiter.api.Assertions.assertEquals(c[1], br.com.ecofast.model.Regras.descontoIptu(c[0]), "saldo " + c[0]);
+            org.junit.jupiter.api.Assertions.assertEquals(c[2], br.com.ecofast.model.Regras.pontosParaProximoPorcento(c[0]), "saldo " + c[0]);
+        }
+    }
+
+    @Test
     void mesmoMetodoRegrasDiferentes() {
         Material[] materiais = {new Papel(), new Plastico(), new Eletronico()};
         int[] esperado = {10, 20, 70}; // 2 kg de cada: 2x5, 2x10, 2x25 + 20 de bônus

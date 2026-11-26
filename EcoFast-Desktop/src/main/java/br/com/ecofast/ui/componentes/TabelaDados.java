@@ -8,6 +8,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
+import javax.swing.SwingUtilities;
 import javax.swing.border.AbstractBorder;
 import javax.swing.border.CompoundBorder;
 import javax.swing.border.EmptyBorder;
@@ -133,6 +134,9 @@ public class TabelaDados extends JScrollPane {
         tabela.getTableHeader().setPreferredSize(new Dimension(100, ALTURA_CABECALHO));
 
         setViewportView(tabela);
+        // A tabela não rola sozinha, mas o JScrollPane engoliria a roda do mouse: repassa para a tela.
+        setWheelScrollingEnabled(false);
+        addMouseWheelListener(e -> getParent().dispatchEvent(SwingUtilities.convertMouseEvent(this, e, getParent())));
         // Uma borda vazia (e não null): com null o JTable troca por uma moldura cinza ao ser adicionado.
         setBorder(BorderFactory.createEmptyBorder());
         setVerticalScrollBarPolicy(VERTICAL_SCROLLBAR_NEVER);

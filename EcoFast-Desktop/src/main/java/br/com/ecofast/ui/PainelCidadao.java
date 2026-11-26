@@ -110,11 +110,11 @@ public class PainelCidadao extends PainelBase {
         JPanel escala = new JPanel(new MigLayout("insets 0, gap 0, fillx", "[grow][]", "[18!]"));
         escala.setOpaque(false);
         escala.add(Tema.mono("0", 12, Font.PLAIN, Tema.TINTA_SUAVE).linha(18));
-        escala.add(Tema.mono(Fmt.inteiro(Regras.META_PONTOS), 12, Font.PLAIN, Tema.TINTA_SUAVE).linha(18));
+        escala.add(Tema.mono(Fmt.inteiro(Regras.PONTOS_DESCONTO_MAXIMO), 12, Font.PLAIN, Tema.TINTA_SUAVE).linha(18));
         c.add(escala, "gaptop 6, h 18!");
         c.add(textoMeta, "gaptop 16, h 23!");
-        c.add(new Paragrafo("A cada " + Fmt.inteiro(Regras.META_PONTOS) + " EcoCoins você ganha "
-                + Regras.DESCONTO_IPTU_PERCENTUAL + "% de desconto no IPTU.", Tema.fonte(14, Font.PLAIN), Tema.TINTA_SUAVE, 21, 344),
+        c.add(new Paragrafo("A cada " + Fmt.inteiro(Regras.PONTOS_POR_FAIXA) + " EcoCoins você ganha "
+                + Regras.DESCONTO_IPTU_PERCENTUAL + "% de desconto no IPTU (" + Regras.PONTOS_POR_UM_PORCENTO + " = 1%), até " + Regras.DESCONTO_MAXIMO_PERCENTUAL + "%.", Tema.fonte(14, Font.PLAIN), Tema.TINTA_SUAVE, 21, 344),
                 "gaptop 4");
         return c;
     }
@@ -167,12 +167,12 @@ public class PainelCidadao extends PainelBase {
         int n = e.entregas().size();
         rodapeExtrato.setText(n == 1 ? "1 entrega no extrato." : n + " entregas no extrato.");
 
-        int pct = (int) Math.min(100, Math.round(100.0 * e.saldoEcoCoins() / Regras.META_PONTOS));
-        regua.setPercentual(pct);
-        percentual.setText(pct + "%");
-        int faltam = Regras.META_PONTOS - e.saldoEcoCoins();
+        int desconto = Regras.descontoIptu(e.saldoEcoCoins());
+        regua.setPercentual(desconto);
+        percentual.setText(desconto + "%");
+        int faltam = Regras.pontosParaProximoPorcento(e.saldoEcoCoins());
         textoMeta.setText(faltam > 0
-                ? "Faltam " + Fmt.inteiro(faltam) + " EcoCoins para o desconto."
-                : "Meta atingida! O desconto já é seu.");
+                ? (faltam == 1 ? "Falta " : "Faltam ") + Fmt.inteiro(faltam) + (faltam == 1 ? " EcoCoin" : " EcoCoins") + " para mais 1%."
+                : "Desconto máximo atingido!");
     }
 }

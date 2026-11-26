@@ -24,11 +24,15 @@ import javax.swing.JPanel;
 import javax.swing.JSpinner;
 import javax.swing.SpinnerNumberModel;
 import javax.swing.SwingConstants;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 import javax.swing.text.MaskFormatter;
 import java.awt.BasicStroke;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
 import java.text.ParseException;
@@ -129,13 +133,38 @@ public class PainelFuncionario extends PainelBase {
         // 03 · peso
         c.add(passo("03", "Peso"), "gaptop 26");
         c.add(Tema.nomeDoCampo("Peso conferido na balança"), "gaptop 10");
-        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(peso, "0.0");
+        JSpinner.NumberEditor editor = new JSpinner.NumberEditor(peso, "0.0#");
         ((DecimalFormat) editor.getFormat()).setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Fmt.ptBr()));
         editor.getTextField().setFont(Tema.fonteMono(26, Font.PLAIN));
         editor.getTextField().setHorizontalAlignment(SwingConstants.RIGHT);
         peso.setEditor(editor);
         peso.setName("peso");
-        peso.addChangeListener(e -> atualizarPrevia());
+        // O spinner só avisa depois de Enter ou troca de campo; o documento avisa a cada tecla.
+        editor.getTextField().getDocument().addDocumentListener(new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                atualizarPrevia();
+            }
+
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                atualizarPrevia();
+            }
+
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                atualizarPrevia();
+            }
+        });
+        // Ponto vale como vírgula: sem isso, "2.5" seria lido como 2 kg.
+        editor.getTextField().addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == '.') {
+                    e.setKeyChar(',');
+                }
+            }
+        });
         JPanel linhaPeso = new JPanel(new MigLayout("insets 0", "[200!][]", "[]"));
         linhaPeso.setOpaque(false);
         linhaPeso.add(peso, "growx, h 56!");
@@ -222,14 +251,25 @@ public class PainelFuncionario extends PainelBase {
         return ((Number) peso.getValue()).doubleValue();
     }
 
+    /** O peso que está escrito no campo agora, mesmo antes de confirmar; nulo se não for um peso válido. */
+    private Double pesoNoCampo() {
+        JFormattedTextField campo = ((JSpinner.DefaultEditor) peso.getEditor()).getTextField();
+        try {
+            return ((Number) campo.getFormatter().stringToValue(campo.getText())).doubleValue();
+        } catch (ParseException e) {
+            return null;
+        }
+    }
+
     /** Mostra, antes de salvar, quanto a entrega vai valer (cada material calcula do seu jeito). */
     private void atualizarPrevia() {
         Material m = selecionado();
-        if (m == null) {
-            previa.setText("0");
+        Double kg = pesoNoCampo();
+        if (m == null || kg == null) {
+            previa.setText("—");
             return;
         }
-        int pontos = m.calcularPontos(Math.round(pesoDigitado() * 100.0) / 100.0);
+        int pontos = m.calcularPontos(Math.round(kg * 100.0) / 100.0);
         previa.setText(Fmt.inteiro(pontos));
     }
 
@@ -262,6 +302,15 @@ public class PainelFuncionario extends PainelBase {
         if (m == null) {
             mostrarErro("Escolha o tipo de material.");
             return;
+        }
+        if (pesoNoCampo() == null) {
+            mostrarErro("O peso deve estar entre 0,1 e 500 kg.");
+            return;
+        }
+        try {
+            peso.commitEdit();
+        } catch (ParseException e) {
+            throw new IllegalStateException(e);
         }
         String cpf = campoCpf.getText();
         double kg = pesoDigitado();

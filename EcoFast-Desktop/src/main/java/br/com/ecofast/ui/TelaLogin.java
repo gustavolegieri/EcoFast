@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.model.Regras;
 import br.com.ecofast.ui.componentes.Cartao;
 import br.com.ecofast.ui.componentes.Marcador;
 import net.miginfocom.swing.MigLayout;
@@ -296,7 +297,8 @@ public final class TelaLogin extends JPanel {
             JPanel lista = new JPanel(new MigLayout("insets 0, gap 0, wrap 1, fillx", "[grow, fill]", ""));
             lista.setOpaque(false);
             String[] passos = {"O funcionário pesa e registra a entrega.", "O sistema calcula e credita os seus pontos.",
-                    "10.000 pontos viram 10% de desconto no IPTU."};
+                    "A cada " + Fmt.inteiro(Regras.PONTOS_POR_FAIXA) + " pontos, "
+                            + Regras.DESCONTO_IPTU_PERCENTUAL + "% de desconto no IPTU."};
             for (int i = 0; i < passos.length; i++) {
                 lista.add(new Passo(String.format("%02d", i + 1), passos[i], i == 0), "growx");
             }

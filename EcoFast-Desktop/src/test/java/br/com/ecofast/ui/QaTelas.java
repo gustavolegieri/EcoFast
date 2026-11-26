@@ -63,7 +63,7 @@ public final class QaTelas {
         foto(janela, "q02-login-preenchido");
         clicar(janela, "botaoEntrar");
         esperar("painel do cidadão", () -> achar(janela, "quemEstaLogado", JLabel.class).getText().contains("Maria"), 8000);
-        esperar("extrato carregado", () -> existeTexto(janela, "para o desconto"), 8000);
+        esperar("extrato carregado", () -> existeTexto(janela, "Faltam"), 8000);
         Thread.sleep(300);
         foto(janela, "q03-cidadao");
         fotoCompleta(janela, "f03-cidadao");
