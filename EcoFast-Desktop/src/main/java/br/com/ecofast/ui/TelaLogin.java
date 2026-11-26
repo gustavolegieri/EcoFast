@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.Regras;
 import br.com.ecofast.ui.componentes.Cartao;
 import br.com.ecofast.ui.componentes.Marcador;
@@ -37,6 +38,8 @@ public final class TelaLogin extends JPanel {
         void entrar(String email, String senha);
 
         void configurarConexao();
+
+        void trocarIdioma(Idioma idioma);
     }
 
     public enum Estado { CONECTANDO, OK, ERRO }
@@ -45,7 +48,7 @@ public final class TelaLogin extends JPanel {
 
     private final JTextField campoEmail = new JTextField();
     private final JPasswordField campoSenha = new JPasswordField();
-    private final JButton botaoEntrar = Tema.botaoPrimario("Entrar");
+    private final JButton botaoEntrar = Tema.botaoPrimario(Idioma.t("Entrar", "Sign in"));
     private final Texto erro = Tema.rotulo(" ", 14, Font.BOLD, Tema.ALERTA);
     private final Texto status = Tema.mono(" ", 12.5f, Font.PLAIN, Tema.TINTA);
 
@@ -65,17 +68,17 @@ public final class TelaLogin extends JPanel {
 
         Cartao cartao = new Cartao(new MigLayout("insets 0, gap 0, wrap 1, hidemode 3", "[396!]", ""))
                 .margens(34, 34, 34, 30).sombra(8, Tema.TINTA);
-        cartao.add(Tema.kicker("Acesso", Tema.VERDE), "h 18!");
-        cartao.add(Tema.titulo("Entrar", 40, 900, Tema.TINTA).linha(39), "gaptop 10, h 39!");
-        cartao.add(Tema.rotulo("Use o e-mail e a senha do seu perfil.", 15, Font.PLAIN, Tema.TINTA_SUAVE), "gaptop 10, h 23!");
+        cartao.add(Tema.kicker(Idioma.t("Acesso", "Access"), Tema.VERDE), "h 18!");
+        cartao.add(Tema.titulo(Idioma.t("Entrar", "Sign in"), 40, 900, Tema.TINTA).linha(39), "gaptop 10, h 39!");
+        cartao.add(Tema.rotulo(Idioma.t("Use o e-mail e a senha do seu perfil.", "Use your profile's email and password."), 15, Font.PLAIN, Tema.TINTA_SUAVE), "gaptop 10, h 23!");
 
-        cartao.add(Tema.nomeDoCampo("E-mail"), "gaptop 18, h 18!");
+        cartao.add(Tema.nomeDoCampo(Idioma.t("E-mail", "Email")), "gaptop 18, h 18!");
         campoEmail.setName("campoEmail");
         Tema.estilizarCampo(campoEmail);
-        campoEmail.putClientProperty("JTextField.placeholderText", "voce@email.com");
+        campoEmail.putClientProperty("JTextField.placeholderText", Idioma.t("voce@email.com", "you@email.com"));
         cartao.add(campoEmail, "gaptop 6, w 392!, h 53!");
 
-        cartao.add(Tema.nomeDoCampo("Senha"), "gaptop 18, h 18!");
+        cartao.add(Tema.nomeDoCampo(Idioma.t("Senha", "Password")), "gaptop 18, h 18!");
         campoSenha.setName("campoSenha");
         Tema.estilizarCampo(campoSenha);
         cartao.add(campoSenha, "gaptop 6, w 392!, h 53!");
@@ -98,11 +101,11 @@ public final class TelaLogin extends JPanel {
         JPanel demos = new JPanel(new MigLayout("insets 0, gap 8 0, hidemode 3", "[][][][]", "[]"));
         demos.setOpaque(false);
         demos.setVisible(false);
-        demos.add(demo("Cidadã", "maria@email.com", "demoCidada"));
-        demos.add(demo("Funcionário", "funcionario@ecofast.com", "demoFuncionario"));
-        demos.add(demo("Administrador", "admin@ecofast.com", "demoAdmin"));
-        demos.add(Tema.mono("senha 123456", 12, Font.PLAIN, Tema.TINTA_SUAVE), "gapleft 4");
-        Alternador alternador = new Alternador("Contas de demonstração");
+        demos.add(demo(Idioma.t("Cidadã", "Citizen"), "maria@email.com", "demoCidada"));
+        demos.add(demo(Idioma.t("Funcionário", "Staff"), "funcionario@ecofast.com", "demoFuncionario"));
+        demos.add(demo(Idioma.t("Administrador", "Administrator"), "admin@ecofast.com", "demoAdmin"));
+        demos.add(Tema.mono(Idioma.t("senha 123456", "password 123456"), 12, Font.PLAIN, Tema.TINTA_SUAVE), "gapleft 4");
+        Alternador alternador = new Alternador(Idioma.t("Contas de demonstração", "Demo accounts"));
         alternador.setName("alternadorDemo");
         alternador.addActionListener(e -> {
             demos.setVisible(alternador.isSelected());
@@ -113,7 +116,7 @@ public final class TelaLogin extends JPanel {
         rodape.add(demos, "gaptop 12");
 
         status.setName("statusConexao");
-        JButton conexao = Tema.botaoLink("Conexão com o banco").tamanho(13);
+        JButton conexao = Tema.botaoLink(Idioma.t("Conexão com o banco", "Database connection")).tamanho(13);
         conexao.setName("botaoConexao");
         conexao.addActionListener(e -> acoes.configurarConexao());
         JPanel linhaStatus = new JPanel(new MigLayout("insets 14 0 0 0, gap 0, fillx", "[grow][]", "[]")) {
@@ -131,6 +134,7 @@ public final class TelaLogin extends JPanel {
         coluna.add(rodape, "w 460!");
 
         lado.add(coluna, "gapleft 8");
+        lado.add(new SeletorIdioma(acoes::trocarIdioma), "pos (container.w-112) 20");
         return lado;
     }
 
@@ -152,6 +156,13 @@ public final class TelaLogin extends JPanel {
 
     public void liberar(boolean pode) {
         botaoEntrar.setEnabled(pode);
+    }
+
+    /** Traz o que já estava na tela anterior, quando ela é montada de novo em outro idioma. */
+    void copiarDe(TelaLogin anterior) {
+        campoEmail.setText(anterior.campoEmail.getText());
+        campoSenha.setText(new String(anterior.campoSenha.getPassword()));
+        liberar(anterior.botaoEntrar.isEnabled());
     }
 
     public void limpar() {
@@ -269,9 +280,9 @@ public final class TelaLogin extends JPanel {
     /** Lado esquerdo: fundo verde chapado com a promessa do app. O título cresce com a largura da janela. */
     private static final class PainelMarca extends JPanel {
 
-        private final Texto linha1 = new Texto("LIXO QUE");
-        private final Texto linha2 = new Texto("ABATE");
-        private final Texto linha3 = new Texto("O IPTU");
+        private final Texto linha1 = new Texto(Idioma.t("LIXO QUE", "TRASH"));
+        private final Texto linha2 = new Texto(Idioma.t("ABATE", "CUTS"));
+        private final Texto linha3 = new Texto(Idioma.t("O IPTU", "YOUR TAX"));
         private float corpo = 102.4f;
 
         PainelMarca() {
@@ -287,7 +298,7 @@ public final class TelaLogin extends JPanel {
 
             JPanel bloco = new JPanel(new MigLayout("insets 0, gap 0, wrap 1, fillx", "[grow, fill]", ""));
             bloco.setOpaque(false);
-            bloco.add(Tema.kicker("Gestão de ecopontos", Tema.OURO), "h 18!, gapbottom 16");
+            bloco.add(Tema.kicker(Idioma.t("Gestão de ecopontos", "Recycling drop-off points"), Tema.OURO), "h 18!, gapbottom 16");
             for (Texto t : new Texto[]{linha1, linha2, linha3}) {
                 t.setForeground(t == linha2 ? Tema.TINTA : Tema.PAPEL);
                 bloco.add(t, "growx");
@@ -296,9 +307,12 @@ public final class TelaLogin extends JPanel {
 
             JPanel lista = new JPanel(new MigLayout("insets 0, gap 0, wrap 1, fillx", "[grow, fill]", ""));
             lista.setOpaque(false);
-            String[] passos = {"O funcionário pesa e registra a entrega.", "O sistema calcula e credita os seus pontos.",
-                    "A cada " + Fmt.inteiro(Regras.PONTOS_POR_FAIXA) + " pontos, "
-                            + Regras.DESCONTO_IPTU_PERCENTUAL + "% de desconto no IPTU."};
+            String faixa = Fmt.inteiro(Regras.PONTOS_POR_FAIXA);
+            String[] passos = {
+                    Idioma.t("O funcionário pesa e registra a entrega.", "Staff weigh and register your delivery."),
+                    Idioma.t("O sistema calcula e credita os seus pontos.", "The system calculates and credits your points."),
+                    Idioma.t("A cada " + faixa + " pontos, " + Regras.DESCONTO_IPTU_PERCENTUAL + "% de desconto no IPTU.",
+                            "Every " + faixa + " points: " + Regras.DESCONTO_IPTU_PERCENTUAL + "% off property tax.")};
             for (int i = 0; i < passos.length; i++) {
                 lista.add(new Passo(String.format("%02d", i + 1), passos[i], i == 0), "growx");
             }
@@ -339,8 +353,8 @@ public final class TelaLogin extends JPanel {
             // o realce dourado de "abate" cobre a área da fonte (maior que a linha), com um respiro de 0,12 em
             if (linha2.getParent() != null) {
                 Point p = SwingUtilities.convertPoint(linha2.getParent(), linha2.getLocation(), this);
-                LineMetrics lm = linha2.getFont().getLineMetrics("ABATE", FRC);
-                double texto = linha2.getFont().getStringBounds("ABATE", FRC).getWidth();
+                LineMetrics lm = linha2.getFont().getLineMetrics(linha2.getText(), FRC);
+                double texto = linha2.getFont().getStringBounds(linha2.getText(), FRC).getWidth();
                 double altura = lm.getAscent() + lm.getDescent();
                 double x = p.x - corpo * 0.06;
                 double largura = corpo * 0.06 + texto + corpo * 0.12 + corpo * 0.06;

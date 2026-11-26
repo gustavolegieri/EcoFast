@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.excecao.AcessoNegadoException;
 import br.com.ecofast.excecao.BancoException;
 import br.com.ecofast.excecao.NaoAutenticadoException;
@@ -49,6 +50,6 @@ public final class Tarefa {
             return BancoException.de(e).getMessage();
         }
         t.printStackTrace();
-        return "Algo inesperado aconteceu: " + (t.getMessage() == null ? t.getClass().getSimpleName() : t.getMessage());
+        return Idioma.t("Algo inesperado aconteceu: ", "Something unexpected happened: ") + (t.getMessage() == null ? t.getClass().getSimpleName() : t.getMessage());
     }
 }

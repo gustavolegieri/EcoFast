@@ -62,6 +62,10 @@ public final class Previa {
             @Override
             public void configurarConexao() {
             }
+
+            @Override
+            public void trocarIdioma(br.com.ecofast.Idioma idioma) {
+            }
         });
         t.setStatus(TelaLogin.Estado.OK, "Conectado: localhost:1433");
         t.liberar(true);
@@ -85,6 +89,7 @@ public final class Previa {
     private static Container comTopo(PainelBase painel, String nome, String perfil) {
         JPanel app = new JPanel(new BorderLayout());
         BarraTopo barra = new BarraTopo(e -> {
+        }, idioma -> {
         });
         barra.setUsuario(nome, perfil);
         barra.setAbas(painel.abas());

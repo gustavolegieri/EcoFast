@@ -1,5 +1,6 @@
 package br.com.ecofast.service;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.dao.DescarteDao;
 import br.com.ecofast.dao.PontoColetaDao;
 import br.com.ecofast.dao.UsuarioDao;
@@ -32,11 +33,11 @@ public class DescarteService {
 
     public ReciboDescarte registrar(Usuario operador, String cpf, String tipoMaterial, double pesoKg) {
         if (!operador.podeRegistrarDescarte()) {
-            throw new AcessoNegadoException("Somente funcionários do ecoponto podem registrar descartes.");
+            throw new AcessoNegadoException(Idioma.t("Somente funcionários do ecoponto podem registrar descartes.", "Only drop-off point staff can register deliveries."));
         }
         Funcionario funcionario = (Funcionario) operador;
         if (funcionario.getPontoColetaId() == null) {
-            throw new IllegalStateException("Este funcionário não está ligado a nenhum ecoponto.");
+            throw new IllegalStateException(Idioma.t("Este funcionário não está ligado a nenhum ecoponto.", "This staff member is not linked to any drop-off point."));
         }
         String cpfFormatado = Cpf.formatar(cpf);
         Material material = MaterialFactory.criar(tipoMaterial);
@@ -44,7 +45,7 @@ public class DescarteService {
         return banco.emTransacao(c -> {
             UsuarioDao usuarios = new UsuarioDao(c);
             Cidadao cidadao = usuarios.buscarCidadaoPorCpfParaAtualizar(cpfFormatado)
-                    .orElseThrow(() -> new IllegalArgumentException("Nenhum cidadão cadastrado com o CPF " + cpfFormatado + "."));
+                    .orElseThrow(() -> new IllegalArgumentException(Idioma.t("Nenhum cidadão cadastrado com o CPF ", "No citizen registered with CPF ") + cpfFormatado + "."));
 
             // 1) A entrega vira objeto: o construtor valida o peso e já calcula os pontos
             Descarte descarte = new Descarte(cidadao.getId(), funcionario.getId(), funcionario.getPontoColetaId(),
@@ -65,22 +66,22 @@ public class DescarteService {
     /** Funcionário digita o CPF e confere de quem é antes de pesar. */
     public Cidadao buscarCidadao(Usuario operador, String cpf) {
         if (!operador.podeRegistrarDescarte()) {
-            throw new AcessoNegadoException("Área exclusiva dos funcionários.");
+            throw new AcessoNegadoException(Idioma.t("Área exclusiva dos funcionários.", "Staff only area."));
         }
         String cpfFormatado = Cpf.formatar(cpf);
         return banco.consultar(c -> new UsuarioDao(c).buscarCidadaoPorCpf(cpfFormatado))
-                .orElseThrow(() -> new IllegalArgumentException("Nenhum cidadão cadastrado com o CPF " + cpfFormatado + "."));
+                .orElseThrow(() -> new IllegalArgumentException(Idioma.t("Nenhum cidadão cadastrado com o CPF ", "No citizen registered with CPF ") + cpfFormatado + "."));
     }
 
     /** Extrato do cidadão logado, lido do banco na hora para o saldo vir atualizado. */
     public Extrato extrato(Usuario usuario) {
         if (!(usuario instanceof Cidadao)) {
-            throw new AcessoNegadoException("O extrato é exclusivo do perfil cidadão.");
+            throw new AcessoNegadoException(Idioma.t("O extrato é exclusivo do perfil cidadão.", "The statement is only available to citizens."));
         }
         return banco.consultar(c -> {
             Cidadao atual = new UsuarioDao(c).buscarPorId(usuario.getId())
                     .map(Cidadao.class::cast)
-                    .orElseThrow(() -> new IllegalStateException("Usuário não encontrado."));
+                    .orElseThrow(() -> new IllegalStateException(Idioma.t("Usuário não encontrado.", "User not found.")));
             List<Descarte> entregas = new DescarteDao(c).listarPorCidadao(atual.getId());
             double totalKg = entregas.stream().mapToDouble(Descarte::getPesoKg).sum();
             return new Extrato(atual.getNome(), atual.getSaldoEcoCoins(), totalKg, entregas);
@@ -89,7 +90,7 @@ public class DescarteService {
 
     public List<RegistroRecente> ultimosRegistros(Usuario operador) {
         if (!(operador instanceof Funcionario funcionario) || funcionario.getPontoColetaId() == null) {
-            throw new AcessoNegadoException("Área exclusiva dos funcionários.");
+            throw new AcessoNegadoException(Idioma.t("Área exclusiva dos funcionários.", "Staff only area."));
         }
         return banco.consultar(c -> new DescarteDao(c).ultimosDoPonto(funcionario.getPontoColetaId(), LIMITE_RECENTES));
     }

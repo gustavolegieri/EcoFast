@@ -1,18 +1,18 @@
 package br.com.ecofast.model;
 
+import br.com.ecofast.Idioma;
+
 /** Perfis de acesso do sistema. O banco guarda o nome da constante. */
 public enum Perfil {
-    CIDADAO("Cidadão"),
-    FUNCIONARIO("Funcionário"),
-    ADMIN("Administrador");
-
-    private final String rotulo;
-
-    Perfil(String rotulo) {
-        this.rotulo = rotulo;
-    }
+    CIDADAO,
+    FUNCIONARIO,
+    ADMIN;
 
     public String getRotulo() {
-        return rotulo;
+        return switch (this) {
+            case CIDADAO -> Idioma.t("Cidadão", "Citizen");
+            case FUNCIONARIO -> Idioma.t("Funcionário", "Staff");
+            case ADMIN -> Idioma.t("Administrador", "Administrator");
+        };
     }
 }

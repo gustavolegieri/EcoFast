@@ -1,5 +1,6 @@
 package br.com.ecofast.service;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.dao.DescarteDao;
 import br.com.ecofast.excecao.AcessoNegadoException;
 import br.com.ecofast.infra.Banco;
@@ -22,7 +23,7 @@ public class RelatorioService {
 
     public Relatorio painel(Usuario usuario) {
         if (!usuario.podeVerRelatorios()) {
-            throw new AcessoNegadoException("Relatórios disponíveis apenas para administradores.");
+            throw new AcessoNegadoException(Idioma.t("Relatórios disponíveis apenas para administradores.", "Reports are only available to administrators."));
         }
         LocalDateTime inicio = LocalDate.now().minusDays(DIAS_DO_RELATORIO - 1L).atStartOfDay();
         return banco.consultar(c -> {

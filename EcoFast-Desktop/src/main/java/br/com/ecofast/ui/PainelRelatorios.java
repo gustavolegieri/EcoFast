@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.Relatorio;
 import br.com.ecofast.model.Usuario;
 import br.com.ecofast.service.RelatorioService;
@@ -27,11 +28,11 @@ public class PainelRelatorios extends PainelBase {
     private final Usuario usuario;
     private final RelatorioService servico;
 
-    private final FaixaKpi indicadores = new FaixaKpi("Total arrecadado", "Entregas", "Cidadãos atendidos", "EcoCoins emitidas");
+    private final FaixaKpi indicadores = new FaixaKpi(Idioma.t("Total arrecadado", "Total collected"), Idioma.t("Entregas", "Deliveries"), Idioma.t("Cidadãos atendidos", "Citizens served"), Idioma.t("EcoCoins emitidas", "EcoCoins issued"));
     private final GraficoBarras barras = new GraficoBarras();
     private final GraficoMateriais materiais = new GraficoMateriais();
-    private final TabelaDados ranking = new TabelaDados("Sem entregas no período.",
-            new String[]{"#", "Cidadão", "Kg entregues", "EcoCoins"}, 2, 3);
+    private final TabelaDados ranking = new TabelaDados(Idioma.t("Sem entregas no período.", "No deliveries in this period."),
+            new String[]{"#", Idioma.t("Cidadão", "Citizen"), Idioma.t("Kg entregues", "Kg delivered"), "EcoCoins"}, 2, 3);
     private final JLabel subtitulo = Tema.rotulo(" ", 15, Font.PLAIN, Tema.TINTA_SUAVE);
     private final JLabel pico = Tema.mono(" ", 12, Font.PLAIN, Tema.TINTA_SUAVE);
 
@@ -47,11 +48,11 @@ public class PainelRelatorios extends PainelBase {
         cabecalho.setOpaque(false);
         JPanel titulos = new JPanel(new MigLayout("insets 0, wrap 1", "[]", "[]8[]10[]"));
         titulos.setOpaque(false);
-        titulos.add(Tema.kicker("Relatórios", Tema.VERDE));
-        titulos.add(Tema.titulo("Painel do ecoponto", 58, Tema.TINTA));
+        titulos.add(Tema.kicker(Idioma.t("Relatórios", "Reports"), Tema.VERDE));
+        titulos.add(Tema.titulo(Idioma.t("Painel do ecoponto", "Drop-off dashboard"), 58, Tema.TINTA));
         titulos.add(subtitulo);
         cabecalho.add(titulos);
-        JButton atualizar = Tema.botaoSecundario("Atualizar");
+        JButton atualizar = Tema.botaoSecundario(Idioma.t("Atualizar", "Refresh"));
         atualizar.setName("atualizar");
         atualizar.addActionListener(e -> atualizar());
         cabecalho.add(atualizar, "aligny bottom");
@@ -62,7 +63,7 @@ public class PainelRelatorios extends PainelBase {
         Cartao cBarras = new Cartao(new MigLayout("insets 0, fill, wrap 1", "[grow, fill]", "[][grow, fill]"));
         JPanel tituloBarras = new JPanel(new MigLayout("insets 0, fillx", "[grow][]"));
         tituloBarras.setOpaque(false);
-        tituloBarras.add(Tema.titulo("Kg arrecadados por dia", 30, Tema.TINTA));
+        tituloBarras.add(Tema.titulo(Idioma.t("Kg arrecadados por dia", "Kg collected per day"), 30, Tema.TINTA));
         tituloBarras.add(pico, "aligny bottom");
         cBarras.add(tituloBarras);
         cBarras.add(barras, "gaptop 14, h 290:290:");
@@ -71,11 +72,11 @@ public class PainelRelatorios extends PainelBase {
         JPanel linhaInferior = new JPanel(new MigLayout("insets 0, fill", "[grow 50, fill][grow 50, fill]", "[grow, fill]"));
         linhaInferior.setOpaque(false);
         Cartao cMateriais = new Cartao(new MigLayout("insets 0, fill, wrap 1", "[grow, fill]", "[][grow, fill]"));
-        cMateriais.add(Tema.titulo("Kg por tipo de material", 30, Tema.TINTA));
+        cMateriais.add(Tema.titulo(Idioma.t("Kg por tipo de material", "Kg by material type"), 30, Tema.TINTA));
         cMateriais.add(materiais, "gaptop 14, growy");
         linhaInferior.add(cMateriais, "gapright 28");
         Cartao cRanking = new Cartao(new MigLayout("insets 0, fill, wrap 1", "[grow, fill]", "[][grow, fill]"));
-        cRanking.add(Tema.titulo("Quem mais reciclou", 30, Tema.TINTA));
+        cRanking.add(Tema.titulo(Idioma.t("Quem mais reciclou", "Top recyclers"), 30, Tema.TINTA));
         ranking.larguras(9, 49, 21, 21);
         ranking.alturaParaLinhas(5);
         cRanking.add(ranking, "gaptop 14");
@@ -91,7 +92,8 @@ public class PainelRelatorios extends PainelBase {
     }
 
     private void mostrar(Relatorio r) {
-        subtitulo.setText("Volume arrecadado nos últimos " + r.dias() + " dias.");
+        subtitulo.setText(Idioma.t("Volume arrecadado nos últimos " + r.dias() + " dias.",
+                "Volume collected in the last " + r.dias() + " days."));
         indicadores.setValor(0, Fmt.kg(r.resumo().totalKg()));
         indicadores.setValor(1, Fmt.inteiro(r.resumo().entregas()));
         indicadores.setValor(2, Fmt.inteiro(r.resumo().cidadaos()));
@@ -110,7 +112,7 @@ public class PainelRelatorios extends PainelBase {
         }
         barras.setDados(dias, valores);
         int p = barras.diaDePico();
-        pico.setText(p >= 0 ? "pico: " + Fmt.kg(valores[p]) + " em " + Fmt.dia(dias.get(p)) : " ");
+        pico.setText(p >= 0 ? Idioma.t("pico: ", "peak: ") + Fmt.kg(valores[p]) + Idioma.t(" em ", " on ") + Fmt.dia(dias.get(p)) : " ");
 
         List<GraficoMateriais.Fatia> fatias = new ArrayList<>();
         r.porMaterial().forEach(m -> fatias.add(new GraficoMateriais.Fatia(Tema.nomeCurto(m.material()),

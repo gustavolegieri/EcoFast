@@ -12,6 +12,7 @@ public final class Main {
     }
 
     public static void main(String[] args) {
+        Idioma.carregar();
         Tema.instalar();
         SwingUtilities.invokeLater(() -> new JanelaPrincipal().iniciar());
     }

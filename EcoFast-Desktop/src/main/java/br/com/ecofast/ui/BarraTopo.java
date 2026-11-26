@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.JButton;
@@ -13,6 +14,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Insets;
 import java.awt.event.ActionListener;
+import java.util.function.Consumer;
 
 /**
  * Barra de cima das telas de quem já entrou: marca, (abas, só no administrador), nome com o perfil e o botão Sair.
@@ -22,16 +24,18 @@ public final class BarraTopo extends JPanel {
 
     private final Texto nome = Tema.mono(" ", 13, Font.PLAIN, Tema.TINTA);
     private final Papel papel = new Papel();
-    private final JButton sair = Tema.botaoPequeno("Sair");
+    private final JButton sair = Tema.botaoPequeno(Idioma.t("Sair", "Sign out"));
+    private final SeletorIdioma idiomas;
     private JComponent abas;
 
-    public BarraTopo(ActionListener aoSair) {
+    public BarraTopo(ActionListener aoSair, Consumer<Idioma> aoTrocarIdioma) {
         super(new MigLayout("insets 0 32 2 32, gap 0, fillx", "[]push[]", "[62!]"));
         setOpaque(false);
         JLabel marca = Tema.titulo("EcoFast", 26, 900, Tema.TINTA).linha(26);
         marca.setIcon(Icone.vetorial(34));
         marca.setIconTextGap(10);
         add(marca, "aligny center");
+        idiomas = new SeletorIdioma(aoTrocarIdioma);
         nome.setName("quemEstaLogado");
         sair.setName("botaoSair");
         sair.addActionListener(aoSair);
@@ -40,7 +44,7 @@ public final class BarraTopo extends JPanel {
 
     private void refazer() {
         // marca | folga | abas? | 32 | nome 12 perfil | 32 | Sair
-        JPanel direita = new JPanel(new MigLayout("insets 0, gap 0, hidemode 3", "[]32[]12[]32[]", "[grow]"));
+        JPanel direita = new JPanel(new MigLayout("insets 0, gap 0, hidemode 3", "[]32[]12[]24[]16[]", "[grow]"));
         direita.setOpaque(false);
         if (abas != null) {
             direita.add(abas, "aligny center, growy");
@@ -49,6 +53,7 @@ public final class BarraTopo extends JPanel {
         }
         direita.add(nome, "aligny center");
         direita.add(papel, "aligny center");
+        direita.add(idiomas, "aligny center");
         direita.add(sair, "aligny center");
         if (getComponentCount() > 1) {
             remove(1);
@@ -96,7 +101,7 @@ public final class BarraTopo extends JPanel {
 
         void definir(String perfil) {
             texto.setFont(Tema.fonteMono(11, Font.PLAIN, 0.06f));
-            texto.setText(perfil.toUpperCase(Fmt.ptBr()));
+            texto.setText(perfil.toUpperCase(Fmt.locale()));
         }
 
         @Override

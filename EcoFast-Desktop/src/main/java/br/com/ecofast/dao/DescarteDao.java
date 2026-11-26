@@ -1,5 +1,6 @@
 package br.com.ecofast.dao;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.Descarte;
 import br.com.ecofast.model.RegistroRecente;
 import br.com.ecofast.model.Relatorio;
@@ -58,7 +59,7 @@ public class DescarteDao extends DaoBase implements Dao<Descarte> {
             ps.executeUpdate();
             try (ResultSet chaves = ps.getGeneratedKeys()) {
                 if (!chaves.next()) {
-                    throw new SQLException("O banco não devolveu o número do descarte.");
+                    throw new SQLException(Idioma.t("O banco não devolveu o número do descarte.", "The database did not return the delivery number."));
                 }
                 d.setId(chaves.getLong(1));
             }

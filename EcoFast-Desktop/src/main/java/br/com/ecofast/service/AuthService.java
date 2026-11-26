@@ -1,5 +1,6 @@
 package br.com.ecofast.service;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.dao.UsuarioDao;
 import br.com.ecofast.excecao.NaoAutenticadoException;
 import br.com.ecofast.infra.Banco;
@@ -17,10 +18,10 @@ public class AuthService {
     public Usuario login(String email, String senha) {
         String limpo = email == null ? "" : email.trim().toLowerCase();
         if (limpo.isEmpty() || senha == null || senha.isEmpty()) {
-            throw new NaoAutenticadoException("Informe e-mail e senha.");
+            throw new NaoAutenticadoException(Idioma.t("Informe e-mail e senha.", "Enter your email and password."));
         }
         return banco.consultar(c -> new UsuarioDao(c).buscarPorEmail(limpo))
                 .filter(u -> u.autenticar(senha))
-                .orElseThrow(() -> new NaoAutenticadoException("E-mail ou senha inválidos."));
+                .orElseThrow(() -> new NaoAutenticadoException(Idioma.t("E-mail ou senha inválidos.", "Invalid email or password.")));
     }
 }

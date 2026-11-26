@@ -1,29 +1,28 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import java.text.NumberFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 
-/** Números e datas no jeito brasileiro, em qualquer computador. */
+/** Números e datas no formato do idioma escolhido, em qualquer computador. */
 public final class Fmt {
-
-    private static final Locale PT_BR = Locale.forLanguageTag("pt-BR");
 
     private Fmt() {
     }
 
-    public static Locale ptBr() {
-        return PT_BR;
+    public static Locale locale() {
+        return Idioma.atual().locale();
     }
 
     public static String inteiro(long n) {
-        return NumberFormat.getIntegerInstance(PT_BR).format(n);
+        return NumberFormat.getIntegerInstance(locale()).format(n);
     }
 
     public static String decimal(double v) {
-        NumberFormat f = NumberFormat.getNumberInstance(PT_BR);
+        NumberFormat f = NumberFormat.getNumberInstance(locale());
         f.setMinimumFractionDigits(1);
         f.setMaximumFractionDigits(1);
         return f.format(v);
@@ -35,18 +34,18 @@ public final class Fmt {
 
     /** Só a data, como no extrato do desenho: 14/11/2026. */
     public static String data(LocalDateTime d) {
-        return d.format(DateTimeFormatter.ofPattern("dd/MM/yyyy", PT_BR));
+        return d.format(DateTimeFormatter.ofPattern(Idioma.t("dd/MM/yyyy", "MM/dd/yyyy"), locale()));
     }
 
     public static String dataHora(LocalDateTime d) {
-        return d.format(DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm", PT_BR));
+        return d.format(DateTimeFormatter.ofPattern(Idioma.t("dd/MM/yyyy HH:mm", "MM/dd/yyyy HH:mm"), locale()));
     }
 
     public static String dataHoraCurta(LocalDateTime d) {
-        return d.format(DateTimeFormatter.ofPattern("dd/MM HH:mm", PT_BR));
+        return d.format(DateTimeFormatter.ofPattern(Idioma.t("dd/MM HH:mm", "MM/dd HH:mm"), locale()));
     }
 
     public static String dia(LocalDate d) {
-        return d.format(DateTimeFormatter.ofPattern("dd/MM", PT_BR));
+        return d.format(DateTimeFormatter.ofPattern(Idioma.t("dd/MM", "MM/dd"), locale()));
     }
 }

@@ -20,6 +20,12 @@ Os dados ficam em um banco **SQL Server**.
 
 CPFs para testar o registro de entrega: `111.111.111-11`, `222.222.222-22`, `333.333.333-33`, `444.444.444-44`.
 
+## Idiomas
+
+O botão **PT | EN** (no alto da tela de login e na barra de cima) troca o idioma na hora, sem perder o que já foi
+preenchido. Datas e números acompanham o idioma, e a escolha fica guardada. Os dados do banco (nomes e ecopontos)
+não são traduzidos. Cada texto fica nos dois idiomas lado a lado, em `Idioma.t("português", "english")`.
+
 ## Requisitos
 
 - Windows 10 ou 11.

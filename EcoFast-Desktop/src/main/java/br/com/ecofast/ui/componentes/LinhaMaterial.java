@@ -1,5 +1,6 @@
 package br.com.ecofast.ui.componentes;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.material.Eletronico;
 import br.com.ecofast.model.material.Material;
 import br.com.ecofast.ui.Tema;
@@ -30,7 +31,7 @@ public class LinhaMaterial extends JToggleButton {
     public LinhaMaterial(Material material) {
         this.material = material;
         String base = (int) material.getMultiplicador() + " pts/kg";
-        this.taxa = material instanceof Eletronico ? base + " + " + Eletronico.BONUS_DESCARTE_SEGURO + " por entrega" : base;
+        this.taxa = material instanceof Eletronico ? base + " + " + Eletronico.BONUS_DESCARTE_SEGURO + Idioma.t(" por entrega", " per delivery") : base;
         setFocusPainted(false);
         setContentAreaFilled(false);
         setBorderPainted(false);

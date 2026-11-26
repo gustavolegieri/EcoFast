@@ -1,5 +1,6 @@
 package br.com.ecofast.ui.componentes;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.material.Material;
 import br.com.ecofast.service.ReciboDescarte;
 import br.com.ecofast.ui.Fmt;
@@ -43,18 +44,18 @@ public class TicketPesagem extends JPanel {
         JLabel marca = Tema.titulo("EcoFast", 28, Tema.TINTA);
         marca.setHorizontalAlignment(SwingConstants.CENTER);
         add(marca, "span 2, growx");
-        add(centro(r.ecoponto() + " · Ticket de pesagem"), "span 2, growx");
-        add(centro(r.descarte().getDataHora().format(DateTimeFormatter.ofPattern("dd/MM/yyyy", Fmt.ptBr()))
-                + " · nº " + String.format("%06d", r.descarte().getId())), "span 2, growx");
+        add(centro(r.ecoponto() + Idioma.t(" · Ticket de pesagem", " · Weighing ticket")), "span 2, growx");
+        add(centro(r.descarte().getDataHora().format(DateTimeFormatter.ofPattern(Idioma.t("dd/MM/yyyy", "MM/dd/yyyy"), Fmt.locale()))
+                + Idioma.t(" · nº ", " · no. ") + String.format("%06d", r.descarte().getId())), "span 2, growx");
         add(new Divisor(), "span 2, growx, gaptop 12, gapbottom 8, h 3!");
 
-        linha("Cidadão", r.cidadao());
+        linha(Idioma.t("Cidadão", "Citizen"), r.cidadao());
         linha("Material", Tema.nomeCurto(m));
-        linha("Peso", Fmt.kg(r.descarte().getPesoKg()) + " × " + (int) m.getMultiplicador());
-        linha("Operador", operador);
+        linha(Idioma.t("Peso", "Weight"), Fmt.kg(r.descarte().getPesoKg()) + " × " + (int) m.getMultiplicador());
+        linha(Idioma.t("Operador", "Operator"), operador);
         add(new Divisor(), "span 2, growx, gaptop 8, gapbottom 10, h 3!");
 
-        add(Tema.mono("Pontos ganhos", 14, Font.PLAIN, Tema.TINTA_SUAVE), "aligny center");
+        add(Tema.mono(Idioma.t("Pontos ganhos", "Points earned"), 14, Font.PLAIN, Tema.TINTA_SUAVE), "aligny center");
         add(Tema.mono("+" + Fmt.inteiro(r.descarte().getPontos()), 34, Font.PLAIN, Tema.TINTA));
 
         JPanel saldo = new JPanel(new MigLayout("insets 10 14 10 14, fillx", "[grow][]", "[]")) {
@@ -65,11 +66,11 @@ public class TicketPesagem extends JPanel {
             }
         };
         saldo.setOpaque(false);
-        saldo.add(Tema.mono("Novo saldo", 14, Font.PLAIN, Tema.PAPEL));
+        saldo.add(Tema.mono(Idioma.t("Novo saldo", "New balance"), 14, Font.PLAIN, Tema.PAPEL));
         saldo.add(Tema.mono(Fmt.inteiro(r.novoSaldo()), 22, Font.PLAIN, Tema.OURO));
         add(saldo, "span 2, growx, gaptop 10");
 
-        JLabel nota = Tema.mono("Crédito lançado após conferência do funcionário.", 11, Font.PLAIN, Tema.TINTA_SUAVE);
+        JLabel nota = Tema.mono(Idioma.t("Crédito lançado após conferência do funcionário.", "Credited after staff verification."), 11, Font.PLAIN, Tema.TINTA_SUAVE);
         nota.setHorizontalAlignment(SwingConstants.CENTER);
         add(nota, "span 2, growx, gaptop 14");
         revalidate();

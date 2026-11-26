@@ -1,5 +1,6 @@
 package br.com.ecofast.ui.componentes;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.ui.Fmt;
 import br.com.ecofast.ui.Tema;
 
@@ -90,7 +91,7 @@ public class GraficoMateriais extends JComponent {
         if (total <= 0) {
             g.setFont(Tema.fonte(14, Font.PLAIN));
             g.setColor(Tema.TINTA_SUAVE);
-            g.drawString("Sem entregas no período.", 0, 24);
+            g.drawString(Idioma.t("Sem entregas no período.", "No deliveries in this period."), 0, 24);
             g.dispose();
             return;
         }

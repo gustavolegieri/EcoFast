@@ -1,5 +1,6 @@
 package br.com.ecofast.ui.componentes;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.ui.Tema;
 
 import javax.swing.JComponent;
@@ -23,7 +24,7 @@ public class Regua extends JComponent {
 
     public void setPercentual(int percentual) {
         this.percentual = Math.max(0, Math.min(100, percentual));
-        setToolTipText(this.percentual + "% de desconto");
+        setToolTipText(this.percentual + Idioma.t("% de desconto", "% discount"));
         repaint();
     }
 

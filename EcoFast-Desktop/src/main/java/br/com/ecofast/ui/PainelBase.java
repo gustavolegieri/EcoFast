@@ -22,6 +22,14 @@ public abstract class PainelBase extends JPanel {
         return null;
     }
 
+    /** O que a pessoa já preencheu, para não se perder quando a tela é montada de novo em outro idioma. */
+    Object guardarEstado() {
+        return null;
+    }
+
+    void restaurarEstado(Object guardado) {
+    }
+
     /** Lê os dados de novo e redesenha a tela. */
     public abstract void atualizar();
 

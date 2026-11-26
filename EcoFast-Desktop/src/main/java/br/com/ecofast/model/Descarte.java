@@ -1,5 +1,6 @@
 package br.com.ecofast.model;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.material.Material;
 
 import java.time.LocalDateTime;
@@ -22,11 +23,11 @@ public class Descarte {
     /** Nova entrega: valida o peso e já calcula os pontos. */
     public Descarte(Long cidadaoId, Long funcionarioId, Long pontoColetaId, Material material, double pesoKg) {
         if (material == null) {
-            throw new IllegalArgumentException("Escolha o tipo de material.");
+            throw new IllegalArgumentException(Idioma.t("Escolha o tipo de material.", "Choose the material type."));
         }
         double peso = Double.isNaN(pesoKg) ? 0 : Math.round(pesoKg * 100.0) / 100.0;
         if (peso <= 0 || peso > Regras.PESO_MAXIMO_KG) {
-            throw new IllegalArgumentException("O peso deve estar entre 0,01 e 500 kg.");
+            throw new IllegalArgumentException(Idioma.t("O peso deve estar entre 0,01 e 500 kg.", "The weight must be between 0.01 and 500 kg."));
         }
         this.cidadaoId = cidadaoId;
         this.funcionarioId = funcionarioId;

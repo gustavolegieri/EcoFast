@@ -179,14 +179,14 @@ public final class Tema {
 
     /** Título em caixa-alta condensada, com a altura de linha apertada (0,98) dos títulos da página. */
     public static Texto titulo(String texto, float tamanho, Color cor) {
-        Texto l = new Texto(texto.toUpperCase(Fmt.ptBr()));
+        Texto l = new Texto(texto.toUpperCase(Fmt.locale()));
         l.setFont(fonteTitulo(tamanho));
         l.setForeground(cor);
         return l.linha(tamanho * 0.98f);
     }
 
     public static Texto titulo(String texto, float tamanho, int peso, Color cor) {
-        Texto l = new Texto(texto.toUpperCase(Fmt.ptBr()));
+        Texto l = new Texto(texto.toUpperCase(Fmt.locale()));
         l.setFont(fonteTitulo(tamanho, peso));
         l.setForeground(cor);
         return l.linha(tamanho * 0.98f);
@@ -206,7 +206,7 @@ public final class Tema {
 
     /** Linha de apoio em caixa-alta espaçada (o "kicker" de cada seção e o nome dos campos). */
     public static Texto kicker(String texto, Color cor) {
-        Texto l = new Texto(texto.toUpperCase(Fmt.ptBr()));
+        Texto l = new Texto(texto.toUpperCase(Fmt.locale()));
         l.setFont(fonteMono(12, Font.PLAIN, 0.08f));
         l.setForeground(cor);
         return l;
@@ -261,6 +261,9 @@ public final class Tema {
         String nome = m.getNome();
         if (nome.startsWith("Lixo ")) {
             nome = nome.substring(5);
+        }
+        if (nome.endsWith(" waste")) {
+            nome = nome.substring(0, nome.length() - " waste".length());
         }
         int barra = nome.indexOf(" / ");
         if (barra > 0) {

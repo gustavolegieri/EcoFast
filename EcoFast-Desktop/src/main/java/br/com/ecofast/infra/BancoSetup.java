@@ -1,5 +1,6 @@
 package br.com.ecofast.infra;
 
+import br.com.ecofast.Idioma;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -27,7 +28,7 @@ public final class BancoSetup {
 
     public static void garantir(ConfigBanco cfg) throws SQLException {
         if (!NOME_SEGURO.matcher(cfg.banco()).matches()) {
-            throw new IllegalArgumentException("Nome do banco inválido: use só letras, números e _.");
+            throw new IllegalArgumentException(Idioma.t("Nome do banco inválido: use só letras, números e _.", "Invalid database name: use only letters, numbers and _."));
         }
         try (Connection c = abrir(cfg)) {
             prepararEstrutura(c);
@@ -73,11 +74,11 @@ public final class BancoSetup {
         String script;
         try (InputStream in = BancoSetup.class.getResourceAsStream(recurso)) {
             if (in == null) {
-                throw new IllegalStateException("Script não encontrado: " + recurso);
+                throw new IllegalStateException(Idioma.t("Script não encontrado: ", "Script not found: ") + recurso);
             }
             script = new String(in.readAllBytes(), StandardCharsets.UTF_8);
         } catch (IOException e) {
-            throw new IllegalStateException("Não consegui ler " + recurso, e);
+            throw new IllegalStateException(Idioma.t("Não consegui ler ", "Couldn't read ") + recurso, e);
         }
         for (String lote : LINHA_GO.split(script)) {
             if (lote.isBlank()) {

@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.Descarte;
 import br.com.ecofast.model.Regras;
 import br.com.ecofast.model.Usuario;
@@ -32,10 +33,10 @@ public class PainelCidadao extends PainelBase {
     private final DescarteService servico;
 
     private final Texto saldo = Tema.numero("--", 104, Tema.PAPEL);
-    private final FaixaKpi indicadores = new FaixaKpi(new String[]{"Material reciclado", "Entregas feitas"},
-            new String[]{"Lixo que não foi para o aterro.", null}, 44, 22);
-    private final TabelaDados tabela = new TabelaDados("Você ainda não tem entregas. Leve seu reciclável ao ecoponto!",
-            new String[]{"Data", "Material", "Peso", "EcoCoins"}, new int[]{0}, new int[]{2, 3});
+    private final FaixaKpi indicadores = new FaixaKpi(new String[]{Idioma.t("Material reciclado", "Recycled material"), Idioma.t("Entregas feitas", "Deliveries made")},
+            new String[]{Idioma.t("Lixo que não foi para o aterro.", "Waste kept out of landfill."), null}, 44, 22);
+    private final TabelaDados tabela = new TabelaDados(Idioma.t("Você ainda não tem entregas. Leve seu reciclável ao ecoponto!", "No deliveries yet. Bring your recyclables to a drop-off point!"),
+            new String[]{Idioma.t("Data", "Date"), "Material", Idioma.t("Peso", "Weight"), "EcoCoins"}, new int[]{0}, new int[]{2, 3});
     private final Regua regua = new Regua();
     private final Texto textoMeta = Tema.rotulo(" ", 15, Font.BOLD, Tema.TINTA).linha(22.5f);
     private final Texto percentual = Tema.mono("0%", 22, Font.PLAIN, Tema.TINTA).linha(33);
@@ -75,7 +76,7 @@ public class PainelCidadao extends PainelBase {
     private Cartao criarPlacaDeSaldo() {
         Cartao c = new Cartao(new MigLayout("insets 0, gap 0, wrap 1, fillx", "[grow, fill]", ""))
                 .cores(Tema.TINTA, Tema.TINTA).margens(28, 30, 30, 30).sombra(8, Tema.OURO);
-        c.add(Tema.kicker("Seu saldo", Tema.OURO), "h 18!");
+        c.add(Tema.kicker(Idioma.t("Seu saldo", "Your balance"), Tema.OURO), "h 18!");
         saldo.setName("saldoEcoCoins");
         saldo.setFont(Tema.fonteMono(104, Font.BOLD, -0.03f));
         saldo.linha(104);
@@ -93,7 +94,7 @@ public class PainelCidadao extends PainelBase {
             }
         };
         nota.setOpaque(false);
-        nota.add(new Paragrafo("Só o funcionário do ecoponto registra entregas. Aqui você consulta.",
+        nota.add(new Paragrafo(Idioma.t("Só o funcionário do ecoponto registra entregas. Aqui você consulta.", "Only drop-off point staff register deliveries. Here you just check them."),
                 Tema.fonte(14, Font.PLAIN), new Color(0xF3, 0xEE, 0xE2, 217), 21, 340));
         c.add(nota, "gaptop 22, growx");
         return c;
@@ -103,7 +104,7 @@ public class PainelCidadao extends PainelBase {
         Cartao c = new Cartao(new MigLayout("insets 0, gap 0, wrap 1, fillx", "[grow, fill]", ""));
         JPanel titulo = new JPanel(new MigLayout("insets 0, gap 14 0, fillx", "[grow][]", "[33!]"));
         titulo.setOpaque(false);
-        titulo.add(Tema.titulo("Seu desconto no IPTU", 22, 800, Tema.TINTA), "aligny baseline");
+        titulo.add(Tema.titulo(Idioma.t("Seu desconto no IPTU", "Your property tax discount"), 22, 800, Tema.TINTA), "aligny baseline");
         titulo.add(percentual, "aligny baseline");
         c.add(titulo, "h 33!");
         c.add(regua, "gaptop 14, h 18!");
@@ -113,8 +114,14 @@ public class PainelCidadao extends PainelBase {
         escala.add(Tema.mono(Fmt.inteiro(Regras.PONTOS_DESCONTO_MAXIMO), 12, Font.PLAIN, Tema.TINTA_SUAVE).linha(18));
         c.add(escala, "gaptop 6, h 18!");
         c.add(textoMeta, "gaptop 16, h 23!");
-        c.add(new Paragrafo("A cada " + Fmt.inteiro(Regras.PONTOS_POR_FAIXA) + " EcoCoins você ganha "
-                + Regras.DESCONTO_IPTU_PERCENTUAL + "% de desconto no IPTU (" + Regras.PONTOS_POR_UM_PORCENTO + " = 1%), até " + Regras.DESCONTO_MAXIMO_PERCENTUAL + "%.", Tema.fonte(14, Font.PLAIN), Tema.TINTA_SUAVE, 21, 344),
+        String faixa = Fmt.inteiro(Regras.PONTOS_POR_FAIXA);
+        c.add(new Paragrafo(Idioma.t(
+                "A cada " + faixa + " EcoCoins você ganha " + Regras.DESCONTO_IPTU_PERCENTUAL
+                        + "% de desconto no IPTU (" + Regras.PONTOS_POR_UM_PORCENTO + " = 1%), até "
+                        + Regras.DESCONTO_MAXIMO_PERCENTUAL + "%.",
+                "Every " + faixa + " EcoCoins take " + Regras.DESCONTO_IPTU_PERCENTUAL
+                        + "% off your property tax (" + Regras.PONTOS_POR_UM_PORCENTO + " = 1%), up to "
+                        + Regras.DESCONTO_MAXIMO_PERCENTUAL + "%."), Tema.fonte(14, Font.PLAIN), Tema.TINTA_SUAVE, 21, 344),
                 "gaptop 4");
         return c;
     }
@@ -123,8 +130,8 @@ public class PainelCidadao extends PainelBase {
         Cartao extrato = new Cartao(new MigLayout("insets 0, gap 0, wrap 1, fill", "[grow, fill]", "[]18[grow, fill][]"));
         JPanel titulo = new JPanel(new MigLayout("insets 0, gap 0, fillx", "[grow][]", "[32!]"));
         titulo.setOpaque(false);
-        titulo.add(Tema.titulo("Extrato de descartes", 30, 800, Tema.TINTA), "aligny baseline");
-        JButton atualizar = Tema.botaoLink("Atualizar");
+        titulo.add(Tema.titulo(Idioma.t("Extrato de descartes", "Delivery statement"), 30, 800, Tema.TINTA), "aligny baseline");
+        JButton atualizar = Tema.botaoLink(Idioma.t("Atualizar", "Refresh"));
         atualizar.setName("atualizar");
         atualizar.addActionListener(e -> atualizar());
         titulo.add(atualizar, "aligny baseline");
@@ -155,7 +162,7 @@ public class PainelCidadao extends PainelBase {
         indicadores.setValor(0, Fmt.decimal(e.totalKg()), "kg");
         indicadores.setValor(1, Fmt.inteiro(e.entregas().size()));
         indicadores.setNota(1, e.entregas().stream().map(Descarte::getDataHora).max(LocalDateTime::compareTo)
-                .map(d -> "Última em " + Fmt.dia(d.toLocalDate()) + ".").orElse(null));
+                .map(d -> Idioma.t("Última em ", "Latest on ") + Fmt.dia(d.toLocalDate()) + ".").orElse(null));
 
         List<Object[]> linhas = new ArrayList<>();
         for (Descarte d : e.entregas()) {
@@ -165,14 +172,16 @@ public class PainelCidadao extends PainelBase {
         }
         tabela.setLinhas(linhas);
         int n = e.entregas().size();
-        rodapeExtrato.setText(n == 1 ? "1 entrega no extrato." : n + " entregas no extrato.");
+        rodapeExtrato.setText(n == 1 ? Idioma.t("1 entrega no extrato.", "1 delivery on the statement.")
+                : n + Idioma.t(" entregas no extrato.", " deliveries on the statement."));
 
         int desconto = Regras.descontoIptu(e.saldoEcoCoins());
         regua.setPercentual(desconto);
         percentual.setText(desconto + "%");
         int faltam = Regras.pontosParaProximoPorcento(e.saldoEcoCoins());
         textoMeta.setText(faltam > 0
-                ? (faltam == 1 ? "Falta " : "Faltam ") + Fmt.inteiro(faltam) + (faltam == 1 ? " EcoCoin" : " EcoCoins") + " para mais 1%."
-                : "Desconto máximo atingido!");
+                ? (faltam == 1 ? Idioma.t("Falta ", "") : Idioma.t("Faltam ", "")) + Fmt.inteiro(faltam)
+                        + (faltam == 1 ? " EcoCoin" : " EcoCoins") + Idioma.t(" para mais 1%.", " to go for another 1%.")
+                : Idioma.t("Desconto máximo atingido!", "Maximum discount reached!"));
     }
 }

@@ -1,5 +1,7 @@
 package br.com.ecofast.model;
 
+import br.com.ecofast.Idioma;
+
 /**
  * Cidadão que entrega o material e acumula EcoCoins.
  *
@@ -26,7 +28,7 @@ public class Cidadao extends Usuario {
     /** Soma os pontos de um descarte aprovado. Rejeita valores que não sejam positivos. */
     public void creditar(int pontos) {
         if (pontos <= 0) {
-            throw new IllegalArgumentException("Só é possível creditar pontos positivos.");
+            throw new IllegalArgumentException(Idioma.t("Só é possível creditar pontos positivos.", "Only positive points can be credited."));
         }
         this.saldoEcoCoins += pontos;
     }

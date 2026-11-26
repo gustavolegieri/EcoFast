@@ -16,6 +16,20 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class RegrasDeNegocioTest {
 
     @Test
+    void nomesTrocamComOIdioma() {
+        var plastico = br.com.ecofast.model.material.MaterialFactory.criar("PLASTICO");
+        try {
+            br.com.ecofast.Idioma.definir(br.com.ecofast.Idioma.EN);
+            org.junit.jupiter.api.Assertions.assertEquals("Plastic", plastico.getNome());
+            org.junit.jupiter.api.Assertions.assertEquals("Citizen", br.com.ecofast.model.Perfil.CIDADAO.getRotulo());
+        } finally {
+            br.com.ecofast.Idioma.definir(br.com.ecofast.Idioma.PT);
+        }
+        org.junit.jupiter.api.Assertions.assertEquals("Plástico", plastico.getNome());
+        org.junit.jupiter.api.Assertions.assertEquals("Cidadão", br.com.ecofast.model.Perfil.CIDADAO.getRotulo());
+    }
+
+    @Test
     void descontoDeIptuCresceUmPorcentoACadaCemEcoCoins() {
         int[][] casos = { // saldo, desconto, pontos para mais 1%
                 {0, 0, 100}, {99, 0, 1}, {358, 3, 42}, {1000, 10, 100}, {2500, 25, 100},

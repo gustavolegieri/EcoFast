@@ -1,5 +1,6 @@
 package br.com.ecofast.model.material;
 
+import br.com.ecofast.Idioma;
 import java.util.List;
 
 /** Converte o código vindo da tela ou do banco no objeto Material certo. */
@@ -17,7 +18,7 @@ public final class MaterialFactory {
                 return m;
             }
         }
-        throw new IllegalArgumentException("Material desconhecido: " + tipo);
+        throw new IllegalArgumentException(Idioma.t("Material desconhecido: ", "Unknown material: ") + tipo);
     }
 
     public static List<Material> todos() {

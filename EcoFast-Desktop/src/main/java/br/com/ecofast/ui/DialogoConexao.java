@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.infra.BancoSetup;
 import br.com.ecofast.infra.ConfigBanco;
 import net.miginfocom.swing.MigLayout;
@@ -27,12 +28,12 @@ public final class DialogoConexao extends JDialog {
     private final JTextField usuario = new JTextField();
     private final JPasswordField senha = new JPasswordField();
     private final JLabel mensagem = new JLabel(" ");
-    private final JButton conectar = Tema.botaoPrimario("Testar e salvar");
-    private final JButton cancelar = Tema.botaoSecundario("Cancelar");
+    private final JButton conectar = Tema.botaoPrimario(Idioma.t("Testar e salvar", "Test and save"));
+    private final JButton cancelar = Tema.botaoSecundario(Idioma.t("Cancelar", "Cancel"));
     private ConfigBanco resultado;
 
     public DialogoConexao(Frame dono, ConfigBanco inicial, String aviso) {
-        super(dono, "Conexão com o SQL Server", true);
+        super(dono, Idioma.t("Conexão com o SQL Server", "SQL Server connection"), true);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setIconImages(Icone.imagens());
 
@@ -50,22 +51,24 @@ public final class DialogoConexao extends JDialog {
 
         JPanel p = new JPanel(new MigLayout("insets 26 30 22 30, wrap 2, fillx", "[grow, fill, 300!][grow, fill, 110!]", ""));
         p.setBackground(Tema.PAPEL);
-        p.add(Tema.kicker("Banco de dados", Tema.VERDE), "span 2");
-        p.add(Tema.titulo("Conexão com o SQL Server", 34, Tema.TINTA), "span 2, gaptop 6");
-        p.add(Tema.rotulo("<html><div style='width:430px'>O EcoFast guarda tudo em um banco SQL Server. Informe onde ele está. "
-                + "Se o banco ainda não existir, ele é criado agora.</div></html>", 15, Font.PLAIN, Tema.TINTA_SUAVE), "span 2, gaptop 8, gapbottom 14");
+        p.add(Tema.kicker(Idioma.t("Banco de dados", "Database"), Tema.VERDE), "span 2");
+        p.add(Tema.titulo(Idioma.t("Conexão com o SQL Server", "SQL Server connection"), 34, Tema.TINTA), "span 2, gaptop 6");
+        p.add(Tema.rotulo("<html><div style='width:300px'>" + Idioma.t(
+                "O EcoFast guarda tudo em um banco SQL Server. Informe onde ele está. Se o banco ainda não existir, ele é criado agora.",
+                "EcoFast stores everything in a SQL Server database. Tell it where it is. If the database doesn't exist yet, it is created now.")
+                + "</div></html>", 15, Font.PLAIN, Tema.TINTA_SUAVE), "span 2, gaptop 8, gapbottom 14");
 
-        p.add(Tema.nomeDoCampo("Servidor"));
-        p.add(Tema.nomeDoCampo("Porta"));
+        p.add(Tema.nomeDoCampo(Idioma.t("Servidor", "Server")));
+        p.add(Tema.nomeDoCampo(Idioma.t("Porta", "Port")));
         p.add(servidor);
         p.add(porta);
-        p.add(Tema.rotulo("Exemplos: localhost  ou  MEU-PC\\SQLEXPRESS", 13, Font.PLAIN, Tema.TINTA_SUAVE), "span 2, gapbottom 8");
+        p.add(Tema.rotulo(Idioma.t("Exemplos: localhost  ou  MEU-PC\\SQLEXPRESS", "Examples: localhost  or  MY-PC\\SQLEXPRESS"), 13, Font.PLAIN, Tema.TINTA_SUAVE), "span 2, gapbottom 8");
 
-        p.add(Tema.nomeDoCampo("Banco de dados"), "span 2");
+        p.add(Tema.nomeDoCampo(Idioma.t("Banco de dados", "Database")), "span 2");
         p.add(banco, "span 2, gapbottom 6");
-        p.add(Tema.nomeDoCampo("Usuário"), "span 2");
+        p.add(Tema.nomeDoCampo(Idioma.t("Usuário", "Username")), "span 2");
         p.add(usuario, "span 2, gapbottom 6");
-        p.add(Tema.nomeDoCampo("Senha"), "span 2");
+        p.add(Tema.nomeDoCampo(Idioma.t("Senha", "Password")), "span 2");
         p.add(senha, "span 2");
 
         mensagem.setFont(Tema.fonte(14, Font.BOLD));
@@ -109,13 +112,13 @@ public final class DialogoConexao extends JDialog {
         try {
             numeroPorta = Integer.parseInt(porta.getText().trim());
         } catch (NumberFormatException e) {
-            definirMensagem("A porta precisa ser um número (o normal é 1433).", true);
+            definirMensagem(Idioma.t("A porta precisa ser um número (o normal é 1433).", "The port must be a number (usually 1433)."), true);
             return;
         }
         ConfigBanco cfg = new ConfigBanco(servidor.getText().trim(), numeroPorta, banco.getText().trim(),
                 usuario.getText().trim(), new String(senha.getPassword()));
         conectar.setEnabled(false);
-        definirMensagem("Conectando…", false);
+        definirMensagem(Idioma.t("Conectando…", "Connecting…"), false);
         Tarefa.executar(() -> {
             BancoSetup.garantir(cfg);
             cfg.salvar();

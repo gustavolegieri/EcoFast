@@ -1,5 +1,6 @@
 package br.com.ecofast.ui;
 
+import br.com.ecofast.Idioma;
 import br.com.ecofast.model.Cidadao;
 import br.com.ecofast.model.RegistroRecente;
 import br.com.ecofast.model.Usuario;
@@ -46,17 +47,20 @@ public class PainelFuncionario extends PainelBase {
     private final DescarteService servico;
 
     private final JFormattedTextField campoCpf;
+    private Cidadao cidadaoAchado;
+    private ReciboDescarte ultimoRecibo;
     private final JLabel achado = new JLabel();
     private final List<LinhaMaterial> linhas = new ArrayList<>();
     private final JSpinner peso = new JSpinner(new SpinnerNumberModel(1.0, 0.1, 500.0, 0.1));
     private final JLabel previa = Tema.mono("0", 40, Font.PLAIN, Tema.TINTA);
     private final JLabel erro = new JLabel();
-    private final JButton salvar = Tema.botaoPrimario("Salvar descarte");
+    private final JButton salvar = Tema.botaoPrimario(Idioma.t("Salvar descarte", "Save delivery"));
     private final JLabel confirmacao = new JLabel();
     private final TicketPesagem ticket = new TicketPesagem();
     private final JPanel reciboBloco = new JPanel(new MigLayout("insets 0, wrap 1, fillx, hidemode 3", "[grow, fill]", ""));
-    private final TabelaDados tabela = new TabelaDados("Nenhum registro ainda.",
-            new String[]{"Quando", "Cidadão", "Material", "Peso", "Pontos"}, 3, 4);
+    private final TabelaDados tabela = new TabelaDados(Idioma.t("Nenhum registro ainda.", "No records yet."),
+            new String[]{Idioma.t("Quando", "When"), Idioma.t("Cidadão", "Citizen"), "Material",
+                    Idioma.t("Peso", "Weight"), Idioma.t("Pontos", "Points")}, 3, 4);
 
     public PainelFuncionario(Usuario operador, DescarteService servico) {
         this.operador = operador;
@@ -85,10 +89,11 @@ public class PainelFuncionario extends PainelBase {
     private JPanel criarLadoDoFormulario() {
         JPanel lado = new JPanel(new MigLayout("insets 0, wrap 1, fillx", "[grow, fill]", ""));
         lado.setOpaque(false);
-        lado.add(Tema.kicker("Registro de entrega", Tema.VERDE));
-        lado.add(Tema.titulo("Registrar entrega", 52, Tema.TINTA), "gaptop 8");
-        lado.add(Tema.rotulo("<html><div style='width:420px'>Confira o peso na balança antes de salvar. "
-                + "Os pontos são calculados pelo sistema.</div></html>", 15, Font.PLAIN, Tema.TINTA_SUAVE), "gaptop 10, gapbottom 24");
+        lado.add(Tema.kicker(Idioma.t("Registro de entrega", "Delivery registration"), Tema.VERDE));
+        lado.add(Tema.titulo(Idioma.t("Registrar entrega", "Register delivery"), 52, Tema.TINTA), "gaptop 8");
+        lado.add(Tema.rotulo("<html><div style='width:420px'>" + Idioma.t(
+                "Confira o peso na balança antes de salvar. Os pontos são calculados pelo sistema.",
+                "Check the weight on the scale before saving. The system calculates the points.") + "</div></html>", 15, Font.PLAIN, Tema.TINTA_SUAVE), "gaptop 10, gapbottom 24");
         lado.add(criarFormulario());
         return lado;
     }
@@ -97,12 +102,12 @@ public class PainelFuncionario extends PainelBase {
         Cartao c = new Cartao(new MigLayout("insets 0, wrap 1, fillx, hidemode 3", "[grow, fill]", ""));
 
         // 01 · cidadão
-        c.add(passo("01", "Cidadão"));
-        c.add(Tema.nomeDoCampo("CPF do cidadão"), "gaptop 10");
+        c.add(passo("01", Idioma.t("Cidadão", "Citizen")));
+        c.add(Tema.nomeDoCampo(Idioma.t("CPF do cidadão", "Citizen's CPF")), "gaptop 10");
         JPanel linhaCpf = new JPanel(new MigLayout("insets 0, fillx", "[grow, fill][]", "[]"));
         linhaCpf.setOpaque(false);
         linhaCpf.add(campoCpf, "gapright 10");
-        JButton buscar = Tema.botaoSecundario("Buscar");
+        JButton buscar = Tema.botaoSecundario(Idioma.t("Buscar", "Search"));
         buscar.setName("buscar");
         buscar.addActionListener(e -> buscarCidadao());
         campoCpf.addActionListener(e -> buscarCidadao());
@@ -118,7 +123,7 @@ public class PainelFuncionario extends PainelBase {
         c.add(passo("02", "Material"), "gaptop 30");
         JPanel lista = new JPanel(new MigLayout("insets 0, wrap 1, fillx, gap 4", "[grow, fill]", ""));
         lista.setOpaque(false);
-        lista.getAccessibleContext().setAccessibleName("Tipo de material");
+        lista.getAccessibleContext().setAccessibleName(Idioma.t("Tipo de material", "Material type"));
         ButtonGroup grupo = new ButtonGroup();
         for (Material m : MaterialFactory.todos()) {
             LinhaMaterial linha = new LinhaMaterial(m);
@@ -131,10 +136,10 @@ public class PainelFuncionario extends PainelBase {
         c.add(lista, "gaptop 10");
 
         // 03 · peso
-        c.add(passo("03", "Peso"), "gaptop 26");
-        c.add(Tema.nomeDoCampo("Peso conferido na balança"), "gaptop 10");
+        c.add(passo("03", Idioma.t("Peso", "Weight")), "gaptop 26");
+        c.add(Tema.nomeDoCampo(Idioma.t("Peso conferido na balança", "Weight checked on the scale")), "gaptop 10");
         JSpinner.NumberEditor editor = new JSpinner.NumberEditor(peso, "0.0#");
-        ((DecimalFormat) editor.getFormat()).setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Fmt.ptBr()));
+        ((DecimalFormat) editor.getFormat()).setDecimalFormatSymbols(DecimalFormatSymbols.getInstance(Fmt.locale()));
         editor.getTextField().setFont(Tema.fonteMono(26, Font.PLAIN));
         editor.getTextField().setHorizontalAlignment(SwingConstants.RIGHT);
         peso.setEditor(editor);
@@ -156,12 +161,13 @@ public class PainelFuncionario extends PainelBase {
                 atualizarPrevia();
             }
         });
-        // Ponto vale como vírgula: sem isso, "2.5" seria lido como 2 kg.
+        // Ponto e vírgula valem como separador decimal: sem isso, "2.5" em português seria lido como 2 kg.
+        char decimal = DecimalFormatSymbols.getInstance(Fmt.locale()).getDecimalSeparator();
         editor.getTextField().addKeyListener(new KeyAdapter() {
             @Override
             public void keyTyped(KeyEvent e) {
-                if (e.getKeyChar() == '.') {
-                    e.setKeyChar(',');
+                if (e.getKeyChar() == '.' || e.getKeyChar() == ',') {
+                    e.setKeyChar(decimal);
                 }
             }
         });
@@ -209,7 +215,7 @@ public class PainelFuncionario extends PainelBase {
             }
         };
         faixa.setOpaque(false);
-        faixa.add(Tema.rotulo("Esta entrega vale", 15, Font.BOLD, Tema.TINTA), "aligny center");
+        faixa.add(Tema.rotulo(Idioma.t("Esta entrega vale", "This delivery is worth"), 15, Font.BOLD, Tema.TINTA), "aligny center");
         previa.setName("previa");
         faixa.add(previa, "aligny center");
         faixa.add(Tema.kicker("EcoCoins", Tema.TINTA), "aligny center");
@@ -233,8 +239,8 @@ public class PainelFuncionario extends PainelBase {
         Cartao historico = new Cartao(new MigLayout("insets 0, fillx, wrap 1", "[grow, fill]", ""));
         JPanel titulo = new JPanel(new MigLayout("insets 0, fillx", "[grow][]"));
         titulo.setOpaque(false);
-        titulo.add(Tema.titulo("Últimos registros", 26, Tema.TINTA));
-        titulo.add(Tema.mono("neste ecoponto", 12, Font.PLAIN, Tema.TINTA_SUAVE), "aligny bottom");
+        titulo.add(Tema.titulo(Idioma.t("Últimos registros", "Latest records"), 26, Tema.TINTA));
+        titulo.add(Tema.mono(Idioma.t("neste ecoponto", "at this drop-off point"), 12, Font.PLAIN, Tema.TINTA_SUAVE), "aligny bottom");
         historico.add(titulo);
         tabela.larguras(21, 24, 23, 17, 15);
         tabela.alturaParaLinhas(6);
@@ -284,12 +290,14 @@ public class PainelFuncionario extends PainelBase {
         String cpf = campoCpf.getText();
         Tarefa.executar(() -> servico.buscarCidadao(operador, cpf), this::mostrarAchado, msg -> {
             achado.setVisible(false);
+            cidadaoAchado = null;
             mostrarErro(msg);
         });
     }
 
     private void mostrarAchado(Cidadao c) {
-        achado.setText("<html><b>" + c.getNome() + "</b> &nbsp;<font color='#3D5646'>saldo atual</font> &nbsp;<b>"
+        cidadaoAchado = c;
+        achado.setText("<html><b>" + c.getNome() + "</b> &nbsp;<font color='#3D5646'>" + Idioma.t("saldo atual", "current balance") + "</font> &nbsp;<b>"
                 + Fmt.inteiro(c.getSaldoEcoCoins()) + "</b> EcoCoins</html>");
         achado.setFont(Tema.fonte(15, Font.PLAIN));
         achado.setForeground(Tema.TINTA);
@@ -300,11 +308,11 @@ public class PainelFuncionario extends PainelBase {
         mostrarErro(null);
         Material m = selecionado();
         if (m == null) {
-            mostrarErro("Escolha o tipo de material.");
+            mostrarErro(Idioma.t("Escolha o tipo de material.", "Choose the material type."));
             return;
         }
         if (pesoNoCampo() == null) {
-            mostrarErro("O peso deve estar entre 0,1 e 500 kg.");
+            mostrarErro(Idioma.t("O peso deve estar entre 0,1 e 500 kg.", "The weight must be between 0.1 and 500 kg."));
             return;
         }
         try {
@@ -320,6 +328,7 @@ public class PainelFuncionario extends PainelBase {
             mostrarRecibo(r);
             peso.setValue(1.0);
             achado.setVisible(false);
+            cidadaoAchado = null;
             atualizar();
         }, msg -> {
             salvar.setEnabled(true);
@@ -328,11 +337,41 @@ public class PainelFuncionario extends PainelBase {
     }
 
     private void mostrarRecibo(ReciboDescarte r) {
-        confirmacao.setText("Descarte nº " + r.descarte().getId() + " registrado com sucesso");
+        ultimoRecibo = r;
+        confirmacao.setText(Idioma.t("Descarte nº ", "Delivery no. ") + r.descarte().getId()
+                + Idioma.t(" registrado com sucesso", " saved successfully"));
         ticket.mostrar(r, operador.getNome());
         reciboBloco.setVisible(true);
         reciboBloco.revalidate();
         reciboBloco.repaint();
+    }
+
+    private record Estado(String cpf, String material, Double peso, Cidadao achado, ReciboDescarte recibo) {
+    }
+
+    @Override
+    Object guardarEstado() {
+        Material m = selecionado();
+        return new Estado(campoCpf.getText(), m == null ? null : m.getTipo(), pesoNoCampo(), cidadaoAchado, ultimoRecibo);
+    }
+
+    @Override
+    void restaurarEstado(Object guardado) {
+        if (!(guardado instanceof Estado e)) {
+            return;
+        }
+        campoCpf.setText(e.cpf());
+        linhas.stream().filter(l -> l.getMaterial().getTipo().equals(e.material())).forEach(l -> l.setSelected(true));
+        if (e.peso() != null) {
+            peso.setValue(e.peso());
+        }
+        if (e.achado() != null) {
+            mostrarAchado(e.achado());
+        }
+        if (e.recibo() != null) {
+            mostrarRecibo(e.recibo());
+        }
+        atualizarPrevia();
     }
 
     @Override
